@@ -36,6 +36,11 @@ asyncio.get_event_loop().run_until_complete(app.start())
 
 That's it. You now have a running SiLA server with the default implementation of the `SimulatorController` feature running.
 
+## Resources
+
+- [SiLA Standard Homepage (https://sila-standard.com/)](https://sila-standard.com/)
+- [SiLA on GitLab (https://gitlab.com/SiLA2)](https://gitlab.com/SiLA2)
+
 ## Library Structure
 
 TBD
