@@ -30,6 +30,7 @@ unitelabs = [
 dev = [
     "black == 24.4.2",
     "bumpver",
+    "flake8 == 7.0.0",
     "isort == 5.13.2",
 ]
 
