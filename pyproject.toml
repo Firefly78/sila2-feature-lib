@@ -1,6 +1,6 @@
 [project]
 name = "sila2-feature-lib"
-version = "v2024.23a0"
+version = "v2024.24a0"
 authors = [
   { name="Erik Trygg", email="etrg@novonordisk.com" },
 ]
@@ -56,7 +56,7 @@ include = ["sila2_feature_lib*"]
 profile = "black"
 
 [tool.bumpver]
-current_version = "v2024.23a0"
+current_version = "v2024.24a0"
 version_pattern = "vYYYY.WW[PYTAGNUM]"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
