@@ -1,7 +1,7 @@
 import json
 import logging
-from typing import Generic, TypeVar, Union
 from importlib import import_module
+from typing import Generic, TypeVar, Union
 
 try:
     from unitelabs import sila
