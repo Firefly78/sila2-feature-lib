@@ -1,4 +1,4 @@
-# Simulation driver (V1.0)
+# Simulation Feature (V1.0)
 
 ## Example usage (Unitelabs SiLA2 framework)
 
