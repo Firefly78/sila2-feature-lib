@@ -45,6 +45,8 @@ T = TypeVar("T")
 
 
 class DataStoreService(sila.Feature, Generic[T]):
+    """Feature for accessing shared resources"""
+
     # Static content
     content = {"handle": None}
 
@@ -80,6 +82,7 @@ class DataStoreService(sila.Feature, Generic[T]):
 
     @classmethod
     def get_handle(cls) -> T:
+        """Get a handle to access shared resources."""
         return DataStoreService.content["handle"]
 
     @sila.UnobservableCommand(

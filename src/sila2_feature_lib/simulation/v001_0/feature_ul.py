@@ -92,8 +92,8 @@ class SimulatorController(sila.Feature):
         )
 
     @sila.UnobservableCommand(
-        description="""Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation 
-        mode.
+        description="""Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation
+         mode.
 
         The Simulation Mode can only be entered, if all hardware operations have been safely terminated
         or are in a controlled, safe state.
