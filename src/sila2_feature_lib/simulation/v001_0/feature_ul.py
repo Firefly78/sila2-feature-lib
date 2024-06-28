@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class StartSimulationModeFailed(sila.DefinedExecutionError):
     """The server cannot change to Simulation Mode.
-    This error can, e.g., be thrown, if a real-world process needs to be ended before switching to simulation
+    This error can, e.g., be thrown, if a real-world process needs to be ended before switching to simulation \
     mode."""
 
 
@@ -92,8 +92,8 @@ class SimulatorController(sila.Feature):
         )
 
     @sila.UnobservableCommand(
-        description="""Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation\n
-          mode.
+        description="""Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation
+         mode.
 
         The Simulation Mode can only be entered, if all hardware operations have been safely terminated
         or are in a controlled, safe state.

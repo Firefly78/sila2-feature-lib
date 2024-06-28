@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Feature Locale="en-us" SiLA2Version="1.1" FeatureVersion="0.1" MaturityLevel="Draft" Originator="ch.unitelabs" Category="core"
+         xmlns="http://www.sila-standard.org"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+  <Identifier>DataStoreService</Identifier>
+  <DisplayName>Data Store Service</DisplayName>
+  <Description>Feature for accessing shared resources</Description>
+  <Command>
+    <Identifier>TestConnection</Identifier>
+    <DisplayName>Test Connection</DisplayName>
+    <Description></Description>
+    <Observable>No</Observable>
+    <Response>
+      <Identifier>Status</Identifier>
+      <DisplayName>Status</DisplayName>
+      <Description>Status of the connection</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Response>
+  </Command>
+  <Property>
+    <Identifier>Details</Identifier>
+    <DisplayName>Details</DisplayName>
+    <Description></Description>
+    <Observable>No</Observable>
+    <DataType>
+      <Basic>String</Basic>
+    </DataType>
+  </Property>
+</Feature>

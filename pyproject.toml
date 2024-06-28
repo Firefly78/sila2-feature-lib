@@ -38,6 +38,10 @@ test = [
     "pytest",
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/Firefly78/sila2-feature-lib"
+"Repository" = "https://github.com/Firefly78/sila2-feature-lib"
+"Bug Tracker" = "https://github.com/Firefly78/sila2-feature-lib/issues"
 
 [build-system]
 requires = ["setuptools>=61.0.0"]
