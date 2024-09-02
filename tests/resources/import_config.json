@@ -1,0 +1,14 @@
+{
+    "first_import": {
+        "import": "resources.import_me:MyClass",
+        "args": [
+            1,
+            2,
+            3
+        ],
+        "kwargs": {
+            "a": 1,
+            "b": 2
+        }
+    }
+}
