@@ -3,6 +3,78 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def dynamic_import_config(filename: str) -> list:
+    """
+    Similar to dynamic_import, but takes the path to a config file as input.
+    The config file need contain a single dictionary, on call the functions/classes \
+        are imported and instantiated.
+
+    Supported formats:
+    - JSON
+    - YAML
+
+    Example JSON:
+    ```json
+    {
+        "item1": {
+            "import": "module1:item1",
+            "kwargs": {
+                "key1": "value1",
+            },
+            "args": ["arg1", "arg2"]
+        }
+    }
+    ```
+
+    Example:
+
+    ```python
+    # Import example:
+    for feature in dynamic_import_config("config.json"):
+        server.add(feature) # Add the feature to the server
+
+    # Is equivalent to:
+    from module1 import item1
+    server.add(item1("arg1", "arg2", key1="value1"))
+    ```
+    """
+
+    # If no filename is provided, return an empty list
+    if not filename:
+        return []  # Nothing
+
+    if filename.endswith(".json"):  # Handle JSON files
+        import json
+
+        load = json.load
+    elif filename.endswith(".yaml"):  # Handle YAML files
+        try:
+            import yaml
+        except ImportError:
+            raise ImportError(
+                "PyYAML is required to load YAML files. Install it with 'pip install pyyaml'"
+            )
+
+        load = yaml.safe_load
+
+    else:
+        raise ValueError(f"Unsupported config file format '{filename}'")
+
+    # Load the config file
+    with open(filename, "r") as f:
+        config = load(f)
+
+    # Type check
+    if not isinstance(config, dict):
+        raise ValueError("Config file must contain a dictionary")
+
+    # Load and instantiate the content
+    return [
+        dynamic_import(c["import"])(*c.get("args", []), **c.get("kwargs", {}))
+        for c in config.values()
+    ]
+
+
 def dynamic_import(name: str) -> any:
     """Dynamically load an item from a python module.
 
@@ -18,7 +90,9 @@ def dynamic_import(name: str) -> any:
 
 
     Args:
-        name (str): The name of the item to load in format 'module:item'."""
+        name (str): The name of the item to load in format 'module:item'.
+
+    """
     from importlib import import_module
 
     try:
