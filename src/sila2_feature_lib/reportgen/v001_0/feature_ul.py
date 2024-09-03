@@ -1,5 +1,4 @@
 import abc
-import logging
 
 try:
     from unitelabs import sila
@@ -7,8 +6,6 @@ except ImportError as ex:
     raise ImportError(
         "Please install the unitelabs package by running 'pip install sila2-feature-lib[unitelabs]'"
     ) from ex
-
-logger = logging.getLogger(__name__)
 
 
 class InvalidParameterError(sila.DefinedExecutionError):
