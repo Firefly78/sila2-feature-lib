@@ -53,5 +53,7 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: Unique indentifier of a data set to generated the report from
         .. parameter:: Additional information needed to generate the report
+
+        .. return:: Unique identifier of the generated report
         """
         # Note: Abstract method
