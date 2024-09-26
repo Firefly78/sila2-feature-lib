@@ -26,7 +26,7 @@ WorkflowRunner = get_workflow_feature(allowed_workflow_names=["workflow1"])
 
 # Implement feature commands/properties
 class MyWorkflowRunner(WorkflowRunner):
-    async def start_workflow(self, name :str, argument_json: str):
+    async def start_new_task(self, name :str, argument_json: str):
         if name == "workflow1":
             asyncio.create_task(workflow1()) # Start the workflow in a separate task
             return name # Return the name of the started workflow
