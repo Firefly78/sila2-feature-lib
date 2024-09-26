@@ -1,7 +1,7 @@
 # Workflow Runner Feature (V1.0)
 
 ## Description
-Feature for running long running async workflows in a separate task. With commands for polling the status of running process.
+Feature for running long running async workflows in a separate task. With commands for polling the status of running processes.
 
 ## Example usage (Unitelabs SiLA2 framework)
 
