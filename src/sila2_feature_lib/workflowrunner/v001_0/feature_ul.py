@@ -105,7 +105,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             description="Start a task from a named workflow and return immediately",
             errors=[TaskError],
         )
-        @sila.Response("identifier", "Identifier of the started workflow process")
+        @sila.Response("Identifier", "Identifier of the started workflow process")
         async def start_new_task(
             self,
             name: typing.Annotated[str, wf_name_annotation],
