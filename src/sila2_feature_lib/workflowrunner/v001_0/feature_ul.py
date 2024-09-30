@@ -17,10 +17,10 @@ class TaskError(sila.DefinedExecutionError):
 class TaskStatus(sila.CustomDataType):
     """Task status dataclass
 
-    .. name:: Name of the workflow
-    .. identifier:: Task identifier
-    .. status:: Execution status
-    .. start_time:: Start time (unix timestamp, utc)
+    .. parameter:: Name of the workflow
+    .. parameter:: Task identifier
+    .. parameter:: Execution status
+    .. parameter:: Start time (unix timestamp, utc)
     """
 
     name: str
@@ -64,11 +64,16 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableCommand(
-            display_name="Cancel tasks",
+            display_name="Cancel task",
             description="Cancel the task with the given identifier",
             errors=[TaskError],
         )
         async def cancel_task(self, identifier: str) -> None:
+            """
+            Cancel task
+
+            .. parameter:: Task identifier
+            """
             pass
 
         @abc.abstractmethod
@@ -87,6 +92,11 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
         )
         @sila.Response("Status", "Status of a task")
         async def get_task_status(self, identifier: str) -> str:
+            """
+            Get the status of the running task
+
+            .. identifier:: Task identifier
+            """
             pass
 
         @abc.abstractmethod
@@ -101,6 +111,12 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name: typing.Annotated[str, wf_name_annotation],
             arguments_json: str,
         ) -> str:
+            """
+            Start a task from a named workflow and return immediately
+
+            .. name:: Name of the workflow
+            .. arguments_json:: JSON encoded arguments for the workflow
+            """
             pass
 
     return WorkflowRunnerService
