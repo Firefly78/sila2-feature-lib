@@ -64,7 +64,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableCommand(
-            display_name="Cancel task",
+            display_name="Cancel Task",
             description="Cancel the task with the given identifier",
             errors=[TaskError],
         )
@@ -78,7 +78,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableProperty(
-            display_name="Running tasks",
+            display_name="Running Tasks",
             description="Get the status of all running tasks",
         )
         async def get_running_tasks(self) -> list[TaskStatus]:
