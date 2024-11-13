@@ -1,0 +1,6 @@
+resources:
+  my_driver_1:
+    alias: mydriver.1
+    url: 192.168.1.1:50001
+    type: sila2
+    sim: false # Simulation mode

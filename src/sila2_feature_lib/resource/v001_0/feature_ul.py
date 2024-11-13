@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List, Type, Union
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 from .util.communication import BaseCall, RestCall, SilaCall
 
@@ -137,16 +137,17 @@ class ResourcesService(sila.Feature):
         if not Path(path).is_file():
             raise FileNotFoundError(f"Config file is not a file: {path}")
 
-        sfx = Path(path).suffix
-        if sfx in [".yaml", ".yml"]:
+        def yaml_import_load(f):
             import yaml
 
+            return yaml.safe_load(f)
+
         with open(Path(path), "r") as f:
-            config = {
-                ".yaml": yaml.safe_load,
-                ".yml": yaml.safe_load,
-                ".json": json.loads,
-            }[sfx](f)
+            config: dict = {
+                ".yaml": yaml_import_load,
+                ".yml": yaml_import_load,
+                ".json": json.load,
+            }[Path(path).suffix](f)
 
         root: dict[str, dict] = config["resources"]
 

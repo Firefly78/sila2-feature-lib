@@ -4,7 +4,7 @@
 
 ```python
 import asyncio
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 
 from sila2_feature_lib.simulation.v001_0.feature_ul import SimulatorController
 from sila2_feature_lib.simulation.v001_0.feature_ul import SimulationModeGlobal as SimMode

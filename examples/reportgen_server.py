@@ -1,6 +1,6 @@
 import asyncio
 
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 
 from sila2_feature_lib.reportgen.v001_0.feature_ul import ReportGenController
 

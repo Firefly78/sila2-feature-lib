@@ -4,7 +4,7 @@ from importlib import import_module
 from pathlib import Path
 
 from sila import fdl_parser
-from unitelabs import Connector, sila
+from unitelabs.cdk import Connector, sila
 
 
 def generate_xml():
