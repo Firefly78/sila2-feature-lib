@@ -4,7 +4,7 @@
 
 ```python
 import asyncio
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 
 from sila2_feature_lib.datastore.v001_0.feature_ul import DataStoreService
 from sila2_feature_lib.datastore.v001_0.feature_ul.extras.resource_handle import ResourceHandle

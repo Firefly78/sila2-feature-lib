@@ -3,7 +3,7 @@ from os import environ
 from typing import Callable
 
 try:
-    from unitelabs import sila
+    from unitelabs.cdk import sila
 except ImportError as ex:
     raise ImportError(
         "Please install the unitelabs package by running 'pip install sila2-feature-lib[unitelabs]'"

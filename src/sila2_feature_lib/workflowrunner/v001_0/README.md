@@ -7,7 +7,7 @@ Feature for running long running async workflows in a separate task. With comman
 
 ```python
 import asyncio
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 
 from sila2_feature_lib.workflowrunner.v001_0.feature_ul import get_workflow_feature
 

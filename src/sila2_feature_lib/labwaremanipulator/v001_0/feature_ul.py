@@ -2,7 +2,7 @@ import abc
 import logging
 import typing
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 from .types.sila_types import (
     HandoverPosition,
