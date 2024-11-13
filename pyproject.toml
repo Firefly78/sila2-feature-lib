@@ -26,7 +26,11 @@ sila2 = [
 ]
 
 unitelabs = [
-    "unitelabs-connector-framework",
+    "unitelabs-cdk >= 0.2.7",
+]
+
+httpx = [
+    "httpx"
 ]
 
 dev = [

@@ -4,7 +4,7 @@ import typing
 from dataclasses import dataclass
 from typing import Iterable, Optional
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 logger = logging.getLogger(__name__)
 

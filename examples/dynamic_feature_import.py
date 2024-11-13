@@ -1,4 +1,4 @@
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 
 from sila2_feature_lib import dynamic_import, dynamic_import_config
 

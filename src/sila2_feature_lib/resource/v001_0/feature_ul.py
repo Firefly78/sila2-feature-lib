@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List, Type, Union
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 from .util.communication import BaseCall, RestCall, SilaCall
 

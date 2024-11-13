@@ -9,7 +9,7 @@ It loads a configuration file with the resources and creates a global resource o
 # Add feature to a SiLA server (unitelabs):
 ```python
 import asyncio
-from unitelabs import Connector
+from unitelabs.cdk import Connector
 from sila2_feature_lib.resource.v001_0.feature_ul import ResourcesService
 
 # Create SiLA server

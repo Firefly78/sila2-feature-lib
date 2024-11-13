@@ -2,7 +2,7 @@ import logging
 import typing
 from abc import ABCMeta, abstractmethod
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 from .types.sila_types import HandoverPosition, InvalidCommandSequence, PositionIndex
 

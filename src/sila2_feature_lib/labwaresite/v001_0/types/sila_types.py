@@ -1,7 +1,7 @@
 import dataclasses
 import typing
 
-from unitelabs import sila
+from unitelabs.cdk import sila
 
 
 class InvalidCommandSequence(sila.DefinedExecutionError):
