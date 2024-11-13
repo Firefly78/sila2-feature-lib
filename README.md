@@ -44,3 +44,14 @@ That's it. You now have a running SiLA server with the default implementation of
 ## Library Structure
 
 TBD
+
+## Change log
+
+### v2024.46
+
+- Updated all features from the old `unitelabs-connector-framework` to the newer `unitelabs-cdk` package
+- Fixed `pyyaml` to be an optional requirement when using the `ResourcesService` feature
+
+### v2024.40 and older
+
+- See [Releases](https://github.com/Firefly78/sila2-feature-lib/releases) for details on older versions
