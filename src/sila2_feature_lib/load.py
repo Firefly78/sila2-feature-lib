@@ -75,7 +75,7 @@ def dynamic_import_config(filename: str) -> list:
     ]
 
 
-def dynamic_import(name: str) -> any:
+def dynamic_import(name: str):
     """Dynamically load an item from a python module.
 
     ```python
