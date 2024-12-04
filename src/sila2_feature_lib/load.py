@@ -1,21 +1,26 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, Optional, Union
 
 
-def dynamic_import_config(filename: str) -> list:
+def dynamic_import_config(config: Optional[Union[str, Path, dict[str, Any]]]) -> list:
     """
-    Similar to dynamic_import, but takes the path to a config file as input.
+    Similar to dynamic_import, but takes the path to a config file or a dict as input. \
     The config file need contain a single dictionary, on call the functions/classes \
-        are imported and instantiated.
+        are imported and instantiated. Should config be `None`, an empty list is returned.
+
+    Args:
+        config (str | Path | dict | None): Path to a config file or the config content.
+
 
     Supported formats:
     - JSON
     - YAML
 
-    Example JSON:
-    ```json
-    {
+    Example config dict:
+    ```
+    config = {
         "item1": {
             "import": "module1:item1",
             "kwargs": {
@@ -26,28 +31,41 @@ def dynamic_import_config(filename: str) -> list:
     }
     ```
 
-    Example:
+    Example code:
 
     ```python
-    # Import example:
+    # The code:
     for feature in dynamic_import_config("config.json"):
-        server.add(feature) # Add the feature to the server
+        server.add(feature)
 
-    # Is equivalent to:
+    # is equivalent to:
     from module1 import item1
     server.add(item1("arg1", "arg2", key1="value1"))
     ```
     """
 
-    # If no filename is provided, return an empty list
-    if not filename:
+    # If no config is provided, return an empty list
+    if config is None:
         return []  # Nothing
 
-    if filename.endswith(".json"):  # Handle JSON files
+    # If the config is a dictionary, assume it is the content
+    if isinstance(config, dict):
+        # Load and instantiate the content
+        return [
+            dynamic_import(c["import"])(*c.get("args", []), **c.get("kwargs", {}))
+            for c in config.values()
+        ]
+
+    # Config is a path
+    # Make sure the path is a Path object
+    if isinstance(config, str):
+        config = Path(config)
+
+    if config.suffix in (".json",):  # Handle JSON files
         import json
 
         load = json.load
-    elif filename.endswith(".yaml"):  # Handle YAML files
+    elif config.suffix in (".yaml", ".yml"):  # Handle YAML files
         try:
             import yaml
         except ImportError:
@@ -58,10 +76,10 @@ def dynamic_import_config(filename: str) -> list:
         load = yaml.safe_load
 
     else:
-        raise ValueError(f"Unsupported config file format '{filename}'")
+        raise ValueError(f"Unsupported config file format '{config}'")
 
     # Load the config file
-    with open(filename, "r") as f:
+    with open(config, "r") as f:
         config = load(f)
 
     # Type check
