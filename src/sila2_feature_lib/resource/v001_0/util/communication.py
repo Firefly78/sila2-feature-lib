@@ -16,6 +16,7 @@ from sila2.client import ClientUnobservableCommand as CUC
 from sila2.client import ClientUnobservableProperty as CUP
 from sila2.client import SilaClient
 from sila2.framework.errors.defined_execution_error import DefinedExecutionError
+from sila2.framework.errors.undefined_execution_error import UndefinedExecutionError
 
 from .grpc import GRPC
 
@@ -150,9 +151,12 @@ class SilaCall(BaseCall):
         except DefinedExecutionError as e:
             # The error raised comes from a SiLA server - reformat it
             raise Exception(f"{self.alias}: {e.identifier}: {e.message}")
-        except Exception:
+        except UndefinedExecutionError as e:
+            # The error raised comes from a SiLA server - reformat it
+            raise Exception(f"{self.alias}: {e.message}")
+        except Exception as e:
             # Else pass it on
-            raise
+            raise Exception(f"{self.alias}: {str(e)}")
 
     async def Ping(self) -> bool:
         try:
