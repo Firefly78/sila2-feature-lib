@@ -15,6 +15,7 @@ from sila2.client import ClientObservableProperty as COP
 from sila2.client import ClientUnobservableCommand as CUC
 from sila2.client import ClientUnobservableProperty as CUP
 from sila2.client import SilaClient
+from sila2.framework.errors.defined_execution_error import DefinedExecutionError
 
 from .grpc import GRPC
 
@@ -29,6 +30,7 @@ async def run_non_blocking(func, *args, **kwargs):
 class BaseCall(metaclass=ABCMeta):
     """Base class for communication calls"""
 
+    alias: str
     url: str
     method: str
     simulated: bool = False
@@ -121,7 +123,7 @@ class SilaCall(BaseCall):
 
         feat, cmd = self.method.split(".")
 
-        def sila():
+        def get_client_and_call():
             c = SilaCall.get_client(
                 address=self.url.split(":")[0],
                 port=int(self.url.split(":")[1]),
@@ -143,7 +145,14 @@ class SilaCall(BaseCall):
             else:
                 raise Exception("This should not happened")
 
-        return await run_non_blocking(sila)
+        try:
+            return await run_non_blocking(get_client_and_call)
+        except DefinedExecutionError as e:
+            # The error raised comes from a SiLA server - reformat it
+            raise Exception(f"{self.alias}: {e.identifier}: {e.message}")
+        except Exception:
+            # Else pass it on
+            raise
 
     async def Ping(self) -> bool:
         try:
