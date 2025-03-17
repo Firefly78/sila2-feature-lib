@@ -6,7 +6,11 @@
 import asyncio
 from unitelabs.cdk import Connector
 
+<<<<<<< HEAD
 from sila2_feature_lib.settings.v001_0.feature_ul import SettingsService, DataStore
+=======
+from sila2_feature_lib.settings.v001_0.feature_ul import SettingsService, access_data_store, DataStore
+>>>>>>> ade79cdc577575ffeec64b54ccf732fda3f80983
 
 # Create SiLA server
 app = Connector({...})
@@ -67,8 +71,11 @@ asyncio.get_event_loop().run_until_complete(app.start())
 ### From anywhere else in you application
 
 ```python
+<<<<<<< HEAD
 from sila2_feature_lib.settings.v001_0.feature_ul import access_data_store
 
+=======
+>>>>>>> ade79cdc577575ffeec64b54ccf732fda3f80983
 # Get acces to store
 store : OnDriveStore = access_data_store()
 # Add things to store (any json - serializable object, more or less)
@@ -77,5 +84,8 @@ store.register("my_settings", {"url": "localhost", "port": 50002})
 port = store.register("my_settings.port")
 # Or subscribe to changes
 store.callbacks.on_update(lambda db, k, v: print(f"{k} => {str(v)}"))
+<<<<<<< HEAD
 
+=======
+>>>>>>> ade79cdc577575ffeec64b54ccf732fda3f80983
 ```
