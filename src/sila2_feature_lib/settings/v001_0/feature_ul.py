@@ -1,6 +1,8 @@
 import json
 import logging
 from dataclasses import dataclass, field
+from io import TextIOWrapper
+from pathlib import Path
 from typing import Any, Callable, List, Literal, Optional, Union
 
 try:
@@ -12,9 +14,18 @@ except ImportError as ex:
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "access_data_store",
+    "DataStore",
+    "OnDriveStore",
+    "SettingsService",
+]
+
 
 @dataclass
 class Callbacks:
+    """Helper class to storeand trigger callbacks for the DataStore"""
+
     on_register: List[Callable[["DataStore", str, Any], None]] = field(
         default_factory=list
     )
@@ -37,6 +48,8 @@ class Callbacks:
 
 
 class DataStore:
+    """Simple in-memory data store, tracks key-value pairs"""
+
     def __init__(self, *, key_separator="."):
         self.key_separator = key_separator
         self._content = {}
@@ -104,11 +117,62 @@ class DataStore:
         self.callbacks.trigger(self, key, value, event="on_update")
 
 
+class OnDriveStore(DataStore):
+    """DataStore that saves to disk"""
+
+    def __init__(
+        self,
+        *,
+        url: Union[str, Path],
+        serialize: Callable[[Any, TextIOWrapper], None] = json.dump,
+        deserialize: Callable[[TextIOWrapper], dict] = json.load,
+        **kwargs,
+    ):
+        self.url = Path(url)
+        self.url.touch(exist_ok=True)
+
+        self.serialize = serialize
+        self.deserialize = deserialize
+
+        data = self._load()
+
+        super().__init__(**kwargs)
+        self._content = data  # Override content
+
+    def register(self, key: str, value: Any):
+        super().register(key, value)
+        self._save()
+
+    def reload(self):
+        self._content = self._load()
+        self.callbacks.trigger(self, event="on_reload")
+
+    def update(self, key: str, value: Any):
+        super().update(key, value)
+        self._save()
+
+    def _save(self):
+        with open(self.url, "w") as f:
+            self.serialize(self._content, f)
+
+    def _load(self):
+        with open(self.url, "r") as f:
+            data = self.deserialize(f)
+
+        if not isinstance(data, dict):
+            raise TypeError("Root object must be a dictionary", {self.url})
+
+        return data
+
+
 def access_data_store() -> DataStore:
+    """Get access to the singleton DataStore created with the SettingsService"""
     return SettingsService.get_singleton_store()
 
 
 class SettingsService(sila.Feature):
+    """SiLA service to manage settings, singleton class - only one instance allowed"""
+
     def __init__(
         self,
         *args,

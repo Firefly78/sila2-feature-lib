@@ -4,57 +4,18 @@
 
 ```python
 import asyncio
+import yaml
+
 from unitelabs.cdk import Connector
 
-from sila2_feature_lib.settings.v001_0.feature_ul import SettingsService, DataStore
+from sila2_feature_lib.settings.v001_0.feature_ul import SettingsService, OnDriverStore
 
 # Create SiLA server
 app = Connector({...})
 
-# Implement custom data store that tracks key/valus on-drive
-class OnDriveStore(DataStore):
-    def __init__(
-        self,
-        *,
-        url: Union[str, Path],
-        **kwargs,
-    ):
-        self.url = Path(url)
-        self.url.touch(exist_ok=True)
-
-        data = self._load()
-
-        super().__init__(**kwargs)
-        self._content = data  # Override content
-
-    def register(self, key: str, value: Any):
-        super().register(key, value)
-        self._save()
-
-    def reload(self):
-        self._content = self._load()
-        self.callbacks.trigger(self, event="on_reload")
-
-    def update(self, key: str, value: Any):
-        super().update(key, value)
-        self._save()
-
-    def _save(self):
-        with open(self.url, "w") as f:
-            yaml.safe_dump(self._content, f, indent=2)
-
-    def _load(self):
-        with open(self.url, "r") as f:
-            data = yaml.safe_load(f)
-
-        if not isinstance(data, dict):
-            raise TypeError("Root object must be a dictionary", {self.url})
-
-        return data
-
-
-# Create feature using our custom store
-settings = SettingsService(store=OnDriveStore())
+# Create feature with our settings stored on-drive
+my_store = OnDriveStore(url=".my_settings.json", serialize=yaml.dump, deserialize=yaml.load)
+settings = SettingsService(store=my_store)
 
 # Add feature to SiLA server
 app.register(data_feature)
