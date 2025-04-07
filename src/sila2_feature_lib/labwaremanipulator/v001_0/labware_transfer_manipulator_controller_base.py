@@ -13,12 +13,13 @@ from .types.sila_types import (
 )
 
 from .defined_execution_errors import (
-    CommandSequenceInvalidError,
-    LabwareAttributeMalformedError,
-    LabwareAttributeMissingError,
-    LabwareDeliveryFailed,
-    LabwareRetrievalFailed,
-    LabwareTypeUnsupportedError,
+    HandoverPositionUnknownError,
+    InternalPositionUnknownError,
+    LabwareUUIDUnknownError
+    # CommandSequenceInvalidError,
+    # LabwareDeliveryFailed,
+    # LabwareRetrievalFailed,
+    # LabwareTypeUnsupportedError,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,10 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     both features.
 
     The complete sequence of issued transfer commands on both devices is as follows:
+
+    0. To inform the active transfer device, if the labware provider is ready to deliver labware at the specified handover
+       position, the "Ready For Retrieval" command is sent to the passive device. If the passive device is not ready to
+       deliver labware, ... 
 
     1. Prior to the actual labware transfer a "Prepare For Output" command is sent to the source device to execute all
        necessary actions to be ready to release a labware item (e.g. open a tray) and simultaneously a "Prepare For
@@ -104,12 +109,12 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     @sila.ObservableCommand(
         name="Ready For Retrieval",
         errors=[
-            CommandSequenceInvalidError,
-            NestUnknownError,
-            LabwareAttributeMissingError,
-            LabwareAttributeMalformedError,
-            LabwareTypeUnknownError,
-            LabwareTypeUnsupportedError,
+            # CommandSequenceInvalidError,
+            HandoverPositionUnknownError,
+            InternalPositionUnknownError,
+            LabwareUUIDUnknownError,
+
+
         ],
     )
     @sila.Response(name="Ready For Retrieval")
@@ -117,7 +122,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         self,
         HandoverPositionUUID: str,
         InternalPositionUUID: str,
-        LabwareUniqueID: str,
+        LabwareUUID: str,
         *,
         status: sila.Status,
     ) -> None: # TransactionToken
@@ -140,10 +145,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         name="Prepare For Retrieval",
         errors=[
             CommandSequenceInvalidError,
-            NestEmptyError,
-            NestUnknownError,
-            LabwareAttributeMissingError,
-            LabwareAttributeMalformedError,
+           
             LabwareTypeUnknownError,
             LabwareTypeUnsupportedError,
         ],
