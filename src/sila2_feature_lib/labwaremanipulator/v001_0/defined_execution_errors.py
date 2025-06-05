@@ -2,6 +2,12 @@
 
 from unitelabs.cdk import sila
 
+
+class CommandSequenceInvalidError(sila.DefinedExecutionError):
+    """
+    Raised when the command sequence is invalid, such as when a command is called out of order.
+    """
+
 class HandoverPositionUnknownError(sila.DefinedExecutionError):
     """
     Raised when the UUID of a handover position is unknown.
@@ -12,7 +18,7 @@ class InternalPositionUnknownError(sila.DefinedExecutionError):
     Raised when the UUID of an internal position is unknown.
     """
 
-class LabwareUUIDUnknownError(sila.DefinedExecutionError):
+class LabwareIDUnknownError(sila.DefinedExecutionError):
     """
     Raised when the UUID of a labware item is unknown.
     """
