@@ -4,17 +4,16 @@ import typing
 
 from unitelabs.cdk import sila
 
-
-from .defined_execution_errors import (
-    HandoverPositionUnknownError,
-    InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
-    LabwareRetrievalFailed,
-    # LabwareTypeUnsupportedError,
+from .types.sila_types import (
+    HandoverPosition,
+    InvalidCommandSequence,
+    LabwareNotPicked,
+    LabwareNotPlaced,
+    PositionIndex,
 )
 
 logger = logging.getLogger(__name__)
+
 
 class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     """
@@ -38,10 +37,6 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     both features.
 
     The complete sequence of issued transfer commands on both devices is as follows:
-
-    0. To inform the active transfer device, if the labware provider is ready to deliver labware at the specified handover
-       position, the "Ready For Retrieval" command is sent to the passive device. If the passive device is not ready to
-       deliver labware, ... 
 
     1. Prior to the actual labware transfer a "Prepare For Output" command is sent to the source device to execute all
        necessary actions to be ready to release a labware item (e.g. open a tray) and simultaneously a "Prepare For
@@ -87,187 +82,123 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     The property "Available Intermediate Actions" returns a list of commands that can be included in a "Put Labware" or
     "Get Labware" command.
     """
-    
+
     def __init__(self):
         super().__init__(
             originator="org.silastandard",
             category="instruments.labware.manipulation",
             version="1.1",
             maturity_level="draft",
-            identifier="LabwareTransferManipulatorController",
+            # identifier="LabwareTransferManipulatorController",
         )
-
+     
     @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="Ready For Retrieval",
-        errors=[
-            CommandSequenceInvalidError,
-            HandoverPositionUnknownError,
-            InternalPositionUnknownError,
-            LabwareIDUnknownError
-        ],
-    )
-    @sila.Response(name="Ready For Retrieval")
-    async def ReadyForRetrieval(
-        self,
-        HandoverPositionID: str, # UUID of the handover position
-        InternalPositionID: str, # UUID of the internal position
-        LabwareID: str, # UUID of the labware item to ensure proper handling
-        *,
-        status: sila.Status,
-    ) -> None: # TransactionToken
+    @sila.UnobservableProperty()
+    async def get_available_handover_positions(self) -> list[NestIdentifier]:
+        
         """
-        Asks, if the device is ready to deliver labware at the specified handover position.
-        This command is used to check if the device is ready to deliver labware at the specified handover position.
-
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
-
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
+        Returns the available handover positions (nests) this device can service.
         """
 
     @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="Prepare For Retrieval",
-        errors=[
-            CommandSequenceInvalidError,
-            HandoverPositionUnknownError,
-            InternalPositionUnknownError,
-            LabwareIDUnknownError
-        ],
-    )
-    async def PrepareForRetrieval(
+    @sila.ObservableCommand(name="Prepare For Input", errors=[InvalidCommandSequence])
+    async def PrepareForInput(
         self,
-        HandoverPositionID: str,
-        InternalPositionID: str,
-        LabwareTypeID: str,
-        LabwareID: str,
-        *,
-        status: sila.Status,
-    ) -> str : # TransactionToken
-        """
-        Prepares the device into a state in which it is ready to accept labware at the specified handover position.
-
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
-
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        """
-
-    @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="Retrieve Labware",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareRetrievalFailed  # Uncomment or define if needed
-        ],
-    )
-    @sila.Response(
-        "Handover Position", "The position where the labware should be retrieved from."
-        # TransactionToken: TransactionToken
-    )
-    async def RetrieveLabware(
-        self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None, # UUID of the labware item to ensure proper handling
-        *,
-        status: sila.Status,
-    ) -> "HandoverPosition":
-        """
-        Retrieves labware from the specified handover position.
-
-        """
-    # labware delivery - do simiar to retrieval
-
-    @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="Ready For Delivery",
-        errors=[
-            CommandSequenceInvalidError,
-            HandoverPositionUnknownError,
-            InternalPositionUnknownError,
-            LabwareIDUnknownError
-        ],
-    )
-    @sila.Response(name="Ready For Delivery")
-    async def ReadyForDelivery(
-        self,
-        HandoverPositionID: str,  # UUID of the handover position
-        InternalPositionID: str,  # UUID of the internal position
-        LabwareID: str,  # UUID of the labware item to ensure proper handling
+        HandoverPosition: HandoverPosition,
+        InternalPosition: PositionIndex,
+        LabwareType: str,
+        LabwareUniqueID: str,
         *,
         status: sila.Status,
     ) -> None:
         """
-        Asks, if the device is ready to release labware at the specified handover position.
-        This command is used to check if the device is ready to release labware at the specified handover position.
+        Put the device into a state in which it is ready to accept new labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
-
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
+        .. parameter:: Indicates the position where the labware will be handed over.
+        .. parameter:: Indicates the position which the labware will be stored at within the device, e.g. internal
+                       storage positions of an incubator.
+        .. parameter:: Specifies the type of labware that will be handed over to transfer information about the labware
+                       that the device might need to handle it correctly.
+        .. parameter:: Represents the unique identification of a labware in the controlling system. It is assigned by
+                       the system and must remain unchanged during the whole process.
+           :display_name: Labware Unique ID
         """
-    
-    @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="Prepare For Delivery",
-        errors=[
-            CommandSequenceInvalidError,
-            HandoverPositionUnknownError,
-            InternalPositionUnknownError,
-            LabwareIDUnknownError
-        ],
-    )
-    async def PrepareForDelivery(
+
+    @sila.ObservableCommand(name="Prepare For Output", errors=[InvalidCommandSequence])
+    async def PrepareForOutput(
         self,
-        HandoverPositionID: str,
-        InternalPositionID: str,
-        LabwareTypeID: str,
-        LabwareID: str,
+        HandoverPosition: HandoverPosition,
+        InternalPosition: PositionIndex,
         *,
         status: sila.Status,
-    ) -> str:
+    ) -> None:
         """
-        Prepares the device into a state in which it is ready to release labware at the specified handover position.
+        Put the device into a state in which it is ready to release the labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
+        .. parameter:: Indicates the position where the labware will be handed over.
+        .. parameter:: Indicates the position which the labware will be retrieved from within the device, e.g. internal
+                       storage positions of an incubator.
+        """
+        logger.info("Running PrepareForOutput")
 
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
+    @abc.abstractmethod
+    @sila.ObservableCommand(
+        name="Put Labware", errors=[InvalidCommandSequence, LabwareNotPlaced]
+    )
+    async def PutLabware(
+        self,
+        HandoverPosition: HandoverPosition,
+        IntermediateActions: list[str],
+        *,
+        status: sila.Status,
+    ) -> None:
+        """
+        Place the currently processed labware item at the specified handover position (sent to the active source device
+        after a "Prepare For Output" command).
 
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
+        .. parameter:: Indicates the position the labware item will be moved to.
+        .. parameter:: Specifies one or more commands that have to be executed within the command sequence (e.g.
+                       removing a lid).
+                       The order of execution is specified by order within the given list.
+                       Each entry must be one of the commands returned by the AvailableIntermediateCommandExecutions
+                       property.
         """
 
+    @abc.abstractmethod
+    @sila.ObservableCommand(
+        name="Get Labware", errors=[InvalidCommandSequence, LabwareNotPicked]
+    )
+    @sila.Response(
+        "HandoverPosition", "The position where the labware was retrieved from."
+    )
+    async def GetLabware(
+        self,
+        HandoverPosition: HandoverPosition,
+        IntermediateActions: list[str],
+        *,
+        status: sila.Status,
+    ) -> HandoverPosition:
+        """
+        Retrieve a labware item from the specified handover position (sent to the active destination device after a
+        "Prepare For Input" command).
+
+        .. parameter:: Indicates the position where the labware will be retrieved from.
+        .. parameter:: Specifies one or more commands that have to be executed within the command sequence (e.g.
+                       removing a lid).
+                       The order of execution is specified by order within the given list.
+                       Each entry must be one of the commands returned by the AvailableIntermediateCommandExecutions
+                       property.
+        """
 
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Available Handover Positions")
-    async def HandoverPositions(self) -> list[str]:
+    async def AvailableHandoverPositions(self) -> list[HandoverPosition]:
         """All handover positions of the device including the number of sub-positions."""
 
-    @sila.UnobservableProperty(display_name="Available Internal Positions")
-    async def InternalPositions(
+    @sila.UnobservableProperty(display_name="Number Of Internal Positions")
+    async def NumberOfInternalPositions(
         self,
-    ) -> list[str]: # better naming 
+    ) -> typing.Annotated[int, sila.constraints.MinimalInclusive(value=1)]:
         """The number of addressable internal positions of the device."""
         return 1  # Default (not used)
 
@@ -284,7 +215,3 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     ]:
         """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
         return []  # Default (not used)
-
-
-    
-     
