@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Feature SiLA2Version="1.0" FeatureVersion="2.0" MaturityLevel="Verified"
+    Originator="org.silastandard"
+    Category="core.commands"
+    xmlns="http://www.sila-standard.org"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+    <Identifier>PauseController</Identifier>
+    <DisplayName>Pause Controller</DisplayName>
+    <Description>
+        Allows to pause or resume a currently running Observable Command. Pausing is the act of
+        stopping the
+        progress of the desired intent of a Command with the option of continuing the execution when
+        resuming.
+
+        A SiLA Client SHOULD be able to pause or resume the Observable Commands at any time. Not
+        every Observable Command
+        might support this Feature. If not, an "OperationNotSupported" Execution Error MUST be
+        thrown.
+    </Description>
+    <Command>
+        <Identifier>Pause</Identifier>
+        <DisplayName>Pause</DisplayName>
+        <Description>
+            Pause the Command execution. The Command can then be resumed again. The Command
+            Execution Status of the
+            Observable Command MUST not be affected.
+        </Description>
+        <Observable>No</Observable>
+        <Parameter>
+            <Identifier>CommandExecutionUUID</Identifier>
+            <DisplayName>Command Execution UUID</DisplayName>
+            <Description>The Command Execution UUID according to the SiLA Standard.</Description>
+            <DataType>
+                <DataTypeIdentifier>UUID</DataTypeIdentifier>
+            </DataType>
+        </Parameter>
+        <DefinedExecutionErrors>
+            <Identifier>InvalidCommandExecutionUUID</Identifier>
+            <Identifier>InvalidCommandState</Identifier>
+            <Identifier>OperationNotSupported</Identifier>
+        </DefinedExecutionErrors>
+    </Command>
+    <Command>
+        <Identifier>Resume</Identifier>
+        <DisplayName>Resume</DisplayName>
+        <Description>Resume the Command after it has been paused.</Description>
+        <Observable>No</Observable>
+        <Parameter>
+            <Identifier>CommandExecutionUUID</Identifier>
+            <DisplayName>Command Execution UUID</DisplayName>
+            <Description>The Command Execution UUID according to the SiLA Standard.</Description>
+            <DataType>
+                <DataTypeIdentifier>UUID</DataTypeIdentifier>
+            </DataType>
+        </Parameter>
+        <DefinedExecutionErrors>
+            <Identifier>InvalidCommandExecutionUUID</Identifier>
+            <Identifier>InvalidCommandState</Identifier>
+            <Identifier>OperationNotSupported</Identifier>
+        </DefinedExecutionErrors>
+    </Command>
+    <Property>
+        <Identifier>PausedCommands</Identifier>
+        <DisplayName>Paused Commands</DisplayName>
+        <Description>A List of Command Execution UUID that are in a paused state.</Description>
+        <Observable>Yes</Observable>
+        <DataType>
+            <List>
+                <DataType>
+                    <DataTypeIdentifier>UUID</DataTypeIdentifier>
+                </DataType>
+            </List>
+        </DataType>
+    </Property>
+    <DefinedExecutionError>
+        <Identifier>InvalidCommandExecutionUUID</Identifier>
+        <DisplayName>Invalid Command Execution UUID</DisplayName>
+        <Description>
+            The given Command Execution UUID does not specify a command that is currently being
+            executed.
+        </Description>
+    </DefinedExecutionError>
+    <DefinedExecutionError>
+        <Identifier>InvalidCommandState</Identifier>
+        <DisplayName>Invalid Command State</DisplayName>
+        <Description>
+            The specified command is not in a valid state to perform the operation (Pause or
+            Resume).
+        </Description>
+    </DefinedExecutionError>
+    <DefinedExecutionError>
+        <Identifier>OperationNotSupported</Identifier>
+        <DisplayName>Operation Not Supported</DisplayName>
+        <Description>
+            The operation (Pause or Resume) is not supported for the SiLA 2 command which the
+            specified Command Execution UUID belongs to.
+        </Description>
+    </DefinedExecutionError>
+    <DataTypeDefinition>
+        <Identifier>UUID</Identifier>
+        <DisplayName>UUID</DisplayName>
+        <Description>A Universally Unique Identifier (UUID) referring to observable command
+            executions.</Description>
+        <DataType>
+            <Constrained>
+                <DataType>
+                    <Basic>String</Basic>
+                </DataType>
+                <Constraints>
+                    <Length>36</Length>
+                    <Pattern>[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}</Pattern>
+                </Constraints>
+            </Constrained>
+        </DataType>
+    </DataTypeDefinition>
+</Feature>
