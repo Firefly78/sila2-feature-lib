@@ -11,7 +11,8 @@ from .defined_execution_errors import (
     LabwareIDUnknownError,
     CommandSequenceInvalidError,
     LabwareRetrievalFailed,
-    # LabwareTypeUnsupportedError,
+    LabwareDeliveryFailed,
+    PositionOccupiedError
 )
 
 logger = logging.getLogger(__name__)
@@ -104,7 +105,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     @sila.Response(name="Ready For Retrieval")
@@ -140,7 +142,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     async def PrepareForRetrieval(
@@ -199,7 +202,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     @sila.Response(name="Ready For Delivery")
@@ -234,7 +238,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     async def PrepareForDelivery(
@@ -268,7 +273,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         name="Deliver Labware",
         errors=[
             CommandSequenceInvalidError,
-            LabwareHandlingFailed,  # Uncomment or define if needed  
+            LabwareDeliveryFailed,
+            PositionOccupiedError
         ],
     )
     async def DeliverLabware(

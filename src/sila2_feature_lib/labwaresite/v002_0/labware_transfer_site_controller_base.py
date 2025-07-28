@@ -13,7 +13,7 @@ from .defined_execution_errors import (
     CommandSequenceInvalidError,
     LabwareDeliveryFailed,
     LabwareRetrievalFailed,
-    NestOccupiedError,
+    PositionOccupiedError,
 )
 
 logger = logging.getLogger(__name__)
@@ -161,7 +161,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     async def PrepareForInput(
@@ -194,7 +195,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         name="LabwareDelivered",
         errors=[
             CommandSequenceInvalidError,
-            LabwareDeliveryFailed
+            LabwareDeliveryFailed,
+            LabwareRetrievalFailed,
+            PositionOccupiedError
         ]
     )
     async def LabwareDelivered(
@@ -215,7 +218,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     @sila.Response(name="Ready For Delivery")
@@ -248,7 +252,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
+            PositionOccupiedError
         ],
     )
     async def PrepareForOutput(

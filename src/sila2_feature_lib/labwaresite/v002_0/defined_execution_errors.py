@@ -39,7 +39,7 @@ class LabwareDeliveryFailed(sila.DefinedExecutionError):
     """
 
 
-class NestOccupiedError(sila.DefinedExecutionError):
+class PositionOccupiedError(sila.DefinedExecutionError):
     """
-    Raised when attempting to place labware in an already occupied nest.
+    Raised when attempting to place labware in an already occupied position.
     """
