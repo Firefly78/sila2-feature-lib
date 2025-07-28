@@ -1,8 +1,11 @@
 [project]
 name = "sila2-feature-lib"
-version = "v2024.49a0"
+version = "v2025.99a0"
 authors = [
   { name="Erik Trygg", email="etrg@novonordisk.com" },
+  { name="Stefan Maak", email="stefan.maak@freenet.com" },
+  { name="Stefan Arzbach", email="stefan.arzbach@a.com" },
+  { name="Mark Doerr", email="mark.doerr@uni-greifswald.de"}
 ]
 description = "SiLA2 feature library"
 readme = "README.md"
@@ -66,7 +69,7 @@ include = ["sila2_feature_lib*"]
 profile = "black"
 
 [tool.bumpver]
-current_version = "v2024.49a0"
+current_version = "v2025.99a0"
 version_pattern = "vYYYY.WW[PYTAGNUM]"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
