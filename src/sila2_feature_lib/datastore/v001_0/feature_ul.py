@@ -87,7 +87,7 @@ class DataStoreService(sila.Feature, Generic[T]):
 
     @sila.UnobservableCommand(
         identifier="TestConnection",
-        display_name="Test Connection",
+        name="Test Connection",
     )
     @sila.Response("Status", "Status of the connection")
     async def test_connection(self) -> str:

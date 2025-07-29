@@ -45,7 +45,6 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
         wf_name_annotation = sila.constraints.MinimalLength(1)
 
     class WorkflowRunnerService(sila.Feature, metaclass=abc.ABCMeta):
-
         def __init__(
             self,
             *args,
@@ -64,13 +63,12 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableCommand(
-            display_name="Cancel Task",
-            description="Cancel the task with the given identifier",
+            name="Cancel Task",
             errors=[TaskError],
         )
         async def cancel_task(self, identifier: str) -> None:
             """
-            Cancel task
+            Cancel the task with the given identifier
 
             .. parameter:: Task identifier
             """
@@ -78,16 +76,15 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableProperty(
-            display_name="Running Tasks",
-            description="Get the status of all running tasks",
+            name="Running Tasks",
         )
         async def get_running_tasks(self) -> list[TaskStatus]:
+            """ "Get the status of all running tasks"""
             pass
 
         @abc.abstractmethod
         @sila.UnobservableCommand(
-            display_name="Task Status",
-            description="Get the status of the running task",
+            name="Task Status",
             errors=[TaskError],
         )
         @sila.Response("Status", "Status of a task")
@@ -101,8 +98,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
         @abc.abstractmethod
         @sila.UnobservableCommand(
-            display_name="Start New Task",
-            description="Start a task from a named workflow and return immediately",
+            name="Start New Task",
             errors=[TaskError],
         )
         @sila.Response("Identifier", "Identifier of the started workflow process")
@@ -112,7 +108,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             arguments_json: str,
         ) -> str:
             """
-            Start a task from a named workflow and return immediately
+            "Start a task from a named workflow and return immediately"
 
             .. name:: Name of the workflow
             .. arguments_json:: JSON encoded arguments for the workflow

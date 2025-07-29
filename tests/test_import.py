@@ -53,4 +53,4 @@ class TestImport(unittest.TestCase):
             get_workflow_feature,
         )
 
-        _ = get_workflow_feature
+        _ = get_workflow_feature()
