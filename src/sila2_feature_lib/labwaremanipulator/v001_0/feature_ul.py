@@ -199,9 +199,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     ) -> list[
         typing.Annotated[
             str,
-            sila.constraints.FullyQualifiedIdentifier(
-                value=sila.constraints.Identifier.COMMAND_IDENTIFIER
-            ),
+            sila.constraints.FullyQualifiedIdentifier(value="CommandIdentifier"),
         ]
     ]:
         """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
