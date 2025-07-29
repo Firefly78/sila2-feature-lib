@@ -8,7 +8,7 @@ from .errors_and_types import (
     ReloadStoreError,
     WriteStoreError,
 )
-from .store import DataStore
+from .store import DataStore, OnDriveStore
 
 try:
     from unitelabs.cdk import sila
@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "access_data_store",
+    "DataStore",
+    "OnDriveStore",
     "SettingsService",
 ]
 
