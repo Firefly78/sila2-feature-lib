@@ -182,26 +182,24 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         """
 
     @abc.abstractmethod
-    @sila.UnobservableProperty(display_name="Available Handover Positions")
+    @sila.UnobservableProperty(name="Available Handover Positions")
     async def AvailableHandoverPositions(self) -> list[HandoverPosition]:
         """All handover positions of the device including the number of sub-positions."""
 
-    @sila.UnobservableProperty(display_name="Number Of Internal Positions")
+    @sila.UnobservableProperty(name="Number Of Internal Positions")
     async def NumberOfInternalPositions(
         self,
     ) -> typing.Annotated[int, sila.constraints.MinimalInclusive(value=1)]:
         """The number of addressable internal positions of the device."""
         return 1  # Default (not used)
 
-    @sila.UnobservableProperty(display_name="Available Intermediate Actions")
+    @sila.UnobservableProperty(name="Available Intermediate Actions")
     async def AvailableIntermediateActions(
         self,
     ) -> list[
         typing.Annotated[
             str,
-            sila.constraints.FullyQualifiedIdentifier(
-                value=sila.constraints.Identifier.COMMAND_IDENTIFIER
-            ),
+            sila.constraints.FullyQualifiedIdentifier(value="CommandIdentifier"),
         ]
     ]:
         """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""

@@ -140,13 +140,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    @sila.UnobservableProperty(display_name="Available Handover Positions")
+    @sila.UnobservableProperty(name="Available Handover Positions")
     async def AvailableHandoverPositions(self) -> typing.List[HandoverPosition]:
         """
         All handover positions of the device including the number of sub-positions.
         """
 
-    @sila.UnobservableProperty(display_name="Number Of Internal Positions")
+    @sila.UnobservableProperty(name="Number Of Internal Positions")
     async def NumberOfInternalPositions(
         self,
     ) -> typing.Annotated[int, sila.constraints.MinimalInclusive(1)]:
