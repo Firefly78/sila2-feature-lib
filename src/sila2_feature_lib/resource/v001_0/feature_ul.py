@@ -31,6 +31,7 @@ class Resource(sila.CustomDataType):
 
     async def Call(self, method: str, *args, **kwargs) -> Any:
         return await GlobalResources.GetResourceType(self.type)(
+            alias=self.alias,
             url=self.url,
             method=method,
             simulated=self.sim,
@@ -38,6 +39,7 @@ class Resource(sila.CustomDataType):
 
     async def Check(self) -> bool:
         return await GlobalResources.GetResourceType(self.type)(
+            alias=self.alias,
             url=self.url,
             method="test",
             simulated=self.sim,

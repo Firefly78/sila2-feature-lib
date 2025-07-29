@@ -12,13 +12,13 @@ except ImportError as ex:
 logger = logging.getLogger(__name__)
 
 
-class StartSimulationModeFailed(sila.DefinedExecutionError):
+class StartSimulationModeFailed(Exception):
     """The server cannot change to Simulation Mode.
     This error can, e.g., be thrown, if a real-world process needs to be ended before switching to simulation \
     mode."""
 
 
-class StartRealModeFailed(sila.DefinedExecutionError):
+class StartRealModeFailed(Exception):
     """The server cannot change to Real Mode.
     This error can, e.g. be thrown, if a device is not ready to change into Real Mode.
     """
@@ -92,31 +92,31 @@ class SimulatorController(sila.Feature):
         )
 
     @sila.UnobservableCommand(
-        description="""Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation
+        errors=[StartSimulationModeFailed],
+    )
+    async def start_simulation_mode(self) -> None:
+        """Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation
          mode.
 
         The Simulation Mode can only be entered, if all hardware operations have been safely terminated
         or are in a controlled, safe state.
 
-        The simulation mode can be stopped by issuing the 'Start Real Mode' command.""",
-        errors=[StartSimulationModeFailed],
-    )
-    async def start_simulation_mode(self) -> None:
+        The simulation mode can be stopped by issuing the 'Start Real Mode' command."""
         SMG.set_simulation_active()
 
     @sila.UnobservableCommand(
-        description="""Sets the SiLA Server to run in real mode, i.e. all following commands are executed with real-world
-      interactions, like serial port/CAN communication, motor actions etc.
-
-      If the server is in Simulation Mode it can be interrupted at any time. A re-initialization of
-      the hardware might be required. The Real Mode can be stopped by issuing the 'Start Simulation Mode' command.""",
         errors=[StartRealModeFailed],
     )
     async def start_real_mode(self) -> None:
+        """Sets the SiLA Server to run in real mode, i.e. all following commands are executed with real-world
+        interactions, like serial port/CAN communication, motor actions etc.
+
+        If the server is in Simulation Mode it can be interrupted at any time. A re-initialization of
+        the hardware might be required. The Real Mode can be stopped by issuing the 'Start Simulation Mode' command.
+        """
         SMG.set_simulation_inactive()
 
-    @sila.UnobservableProperty(
-        description="""Indication whether SiLA Server is in Simulation Mode or not."""
-    )
+    @sila.UnobservableProperty()
     async def simulation_mode(self) -> bool:
+        """Indication whether SiLA Server is in Simulation Mode or not."""
         return SMG.is_simulation_active()
