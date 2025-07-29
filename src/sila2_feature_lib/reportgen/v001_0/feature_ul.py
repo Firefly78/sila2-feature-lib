@@ -39,7 +39,7 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     @sila.UnobservableCommand(
-        display_name="Generate Report",
+        name="Generate Report",
         errors=[InternalError, InvalidParameterError, ReportGenerationError],
     )
     @sila.Response("Report ID")
