@@ -1,9 +1,14 @@
 import json
 import logging
-from dataclasses import dataclass, field
-from io import TextIOWrapper
-from pathlib import Path
-from typing import Any, Callable, List, Literal, Optional, Union
+from typing import Optional
+
+from .errors_and_types import (
+    ReadStoreError,
+    RegisterKeyError,
+    ReloadStoreError,
+    WriteStoreError,
+)
+from .store import DataStore
 
 try:
     from unitelabs.cdk import sila
@@ -16,153 +21,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "access_data_store",
-    "DataStore",
-    "OnDriveStore",
     "SettingsService",
 ]
-
-
-@dataclass
-class Callbacks:
-    """Helper class to storeand trigger callbacks for the DataStore"""
-
-    on_register: List[Callable[["DataStore", str, Any], None]] = field(
-        default_factory=list
-    )
-    on_update: List[Callable[["DataStore", str, Any], None]] = field(
-        default_factory=list
-    )
-    on_reload: List[Callable[["DataStore"], None]] = field(default_factory=list)
-
-    def trigger(
-        self,
-        *args,
-        event: Literal["on_register", "on_update", "on_reload"],
-        **kwargs,
-    ):
-        for cb in getattr(self, event) or []:
-            try:
-                cb(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Error in callback {event}: {e}")
-
-
-class DataStore:
-    """Simple in-memory data store, tracks key-value pairs"""
-
-    def __init__(self, *, key_separator="."):
-        self.key_separator = key_separator
-        self._content = {}
-        self.callbacks = Callbacks()
-
-    def read_all(self):
-        return self._content.copy()
-
-    def read(self, key: str):
-        def _read(_key: str, settings: dict):
-            if self.key_separator not in _key:
-                return settings[_key]
-            else:
-                _key, next = _key.split(self.key_separator, maxsplit=1)
-                return _read(next, settings[_key])
-
-        return _read(key, self._content)
-
-    def register(self, key: str, value: Any):
-        def _register(
-            _key: str,
-            _value: Union[str, int, float, dict[str, Any], list],
-            settings: dict,
-        ):
-            if not isinstance(settings, dict):
-                raise TypeError(
-                    f"Cannot register key in non-dict object {key.split(_key)[0]}"
-                )
-
-            if self.key_separator not in _key:
-                if _key in settings:
-                    raise KeyError(f"Key '{_key}' already exists")
-                settings[_key] = _value
-            else:
-                _key, next = _key.split(self.key_separator, maxsplit=1)
-                if _key not in settings:
-                    settings[_key] = {}
-                _register(next, _value, settings[_key])
-
-        _register(key, value, self._content)
-        self.callbacks.trigger(self, key, value, event="on_register")
-
-    def reload(self):
-        logger.info("Reloading settings")
-        self._content = {}  # Empty the content - default
-        self.callbacks.trigger(self, event="on_reload")
-
-    def update(self, key: str, value: Any):
-        def _update(
-            _key: str,
-            _value: Union[str, int, float, dict[str, Any], list],
-            settings: dict,
-        ):
-            if self.key_separator not in _key:
-                if _key not in settings:
-                    raise KeyError(f"Key '{_key}' in '{key}' does not exist")
-                settings[_key] = _value
-            else:
-                _key, next = _key.split(self.key_separator, maxsplit=1)
-                if _key not in settings:
-                    raise KeyError(f"Key '{_key}' in '{key}' does not exist")
-                _update(next, _value, settings[_key])
-
-        _update(key, value, self._content)
-        self.callbacks.trigger(self, key, value, event="on_update")
-
-
-class OnDriveStore(DataStore):
-    """DataStore that saves to disk"""
-
-    def __init__(
-        self,
-        *,
-        url: Union[str, Path],
-        serialize: Callable[[Any, TextIOWrapper], None] = json.dump,
-        deserialize: Callable[[TextIOWrapper], dict] = json.load,
-        **kwargs,
-    ):
-        self.url = Path(url)
-        self.url.touch(exist_ok=True)
-
-        self.serialize = serialize
-        self.deserialize = deserialize
-
-        data = self._load()
-
-        super().__init__(**kwargs)
-        self._content = data  # Override content
-
-    def register(self, key: str, value: Any):
-        super().register(key, value)
-        self._save()
-
-    def reload(self):
-        self._content = self._load()
-        self.callbacks.trigger(self, event="on_reload")
-
-    def update(self, key: str, value: Any):
-        super().update(key, value)
-        self._save()
-
-    def _save(self):
-        with open(self.url, "w") as f:
-            self.serialize(self._content, f)
-
-    def _load(self):
-        with open(self.url, "r") as f:
-            data = self.deserialize(f)
-
-        if not isinstance(data, dict):
-            raise TypeError("Root object must be a dictionary", {self.url})
-
-        return data
 
 
 def access_data_store() -> DataStore:
@@ -197,61 +57,71 @@ class SettingsService(sila.Feature):
             raise ValueError("Only one instance of SettingsFeature is allowed")
         cls._instance = instance
 
-    @sila.UnobservableCommand(
-        description="Return content of the key",
-    )
+    @sila.UnobservableCommand(errors=[ReadStoreError])
     async def read(self, key: str) -> str:
         """
+        Return content of the key
+
         .. parameter:: Key to read from the settings object
             :name: Key
         .. return:: JSON representation of the value
             :name: Json
         """
 
-        return json.dumps(self._store.read(key))
+        try:
+            return json.dumps(self._store.read(key))
+        except KeyError as e:
+            raise ReadStoreError(str(e))
 
-    @sila.UnobservableCommand(
-        description="Return a copy of the settings object (JSON)",
-    )
+    @sila.UnobservableCommand()
     async def read_all(self) -> str:
         """
+        Return a copy of the settings object (JSON)
+
         .. return:: JSON representation of the settings object
             :name: Json
         """
         return json.dumps(self._store.read_all())
 
-    @sila.UnobservableCommand(
-        description="Register a new key-value pair, will error if key already exists",
-    )
+    @sila.UnobservableCommand(errors=[RegisterKeyError])
     async def register(self, key: str, value: str):
         """
+        Register a new key-value pair, will error if key already exists
+
         .. parameter:: Target key
             :name: Key
         .. parameter:: Value to write to the key location
             :name: Value
         """
         logger.info(f"Registering {key} with value {value}")
-        self._store.register(key, json.loads(value))
+        try:
+            self._store.register(key, json.loads(value))
+        except (KeyError, TypeError) as e:
+            raise RegisterKeyError(str(e))
 
-    @sila.UnobservableCommand(
-        description="Reload the settings from file",
-    )
+    @sila.UnobservableCommand(errors=[ReloadStoreError])
     async def reload(self):
         """
         Reload the settings from source
         """
         logger.info("Reloading settings...")
-        self._store.reload()
+        try:
+            self._store.reload()
+        except Exception as e:
+            raise ReloadStoreError(str(e))
 
-    @sila.UnobservableCommand(
-        description="Update the value of a key",
-    )
+    @sila.UnobservableCommand(errors=[WriteStoreError])
     async def update(self, key: str, value: str):
         """
+        Update the value of a key
+
         .. parameter:: Target key to update
             :name: Key
         .. parameter:: Value to write to the key location
             :name: Value
         """
         logger.info(f"Updating {key} with value {value}")
-        self._store.update(key, json.loads(value))
+        try:
+            self._store.update(key, json.loads(value))
+        except KeyError as e:
+            raise WriteStoreError(str(e))
