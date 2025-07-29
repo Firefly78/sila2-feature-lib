@@ -47,6 +47,10 @@ TBD
 
 ## Change log
 
+### v2025.30
+
+- Various fixes related to breaking changes in unitelabs-cdk / unitelabs-sila packages
+
 ### v2025.7
 
 - Improved error handling in `ResourcesService`
