@@ -1,0 +1,52 @@
+# Error Handling Feature (V1.0)
+
+## Example usage (Unitelabs SiLA2 framework)
+
+```python
+import asyncio
+from unitelabs.cdk import Connector
+
+from sila2_feature_lib.datastore.v001_0.feature_ul import DataStoreService
+from sila2_feature_lib.datastore.v001_0.feature_ul.extras.resource_handle import ResourceHandle
+
+# Create SiLA server
+app = Connector({...})
+
+
+# Create feature
+error_handling_feat = ErrorHandlingService()
+
+# Add feature to SiLA server
+app.register(error_handling_feat)
+
+# Start server
+asyncio.get_event_loop().run_until_complete(app.start())
+```
+
+## Integrate Observable SiLA Commands
+
+```python
+@staticmethod
+async def work(input :int):
+    await asyncio.sleep(1)
+
+@ObservableCommand()
+async def MyMethod():
+    # Choose to raise or not...from an exception
+    await work(1)
+    await ErrorHandler.simple(Exception("Something bad happended"), always_raise = false)
+    await work(1)
+
+    # Or run a piece of code, and handle any exception raised - easy to re-run or skip ahead on error
+    result = await ErrorHandle.run(lambda: work(1), enable_retry = true)
+
+    # Or accomplish the same thing more hands-on
+    while True:
+        await work(1)
+        if not await ErrorHandler.try_again(Exception("Something bad"))
+            break
+
+    # Or maybe do a cancelToken type approach?
+    work
+
+```
