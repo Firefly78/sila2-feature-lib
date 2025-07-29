@@ -112,7 +112,8 @@ class SimulatorController(sila.Feature):
         interactions, like serial port/CAN communication, motor actions etc.
 
         If the server is in Simulation Mode it can be interrupted at any time. A re-initialization of
-        the hardware might be required. The Real Mode can be stopped by issuing the 'Start Simulation Mode' command."""
+        the hardware might be required. The Real Mode can be stopped by issuing the 'Start Simulation Mode' command.
+        """
         SMG.set_simulation_inactive()
 
     @sila.UnobservableProperty()
