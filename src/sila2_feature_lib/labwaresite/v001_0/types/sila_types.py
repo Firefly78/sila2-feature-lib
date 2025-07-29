@@ -4,18 +4,18 @@ import typing
 from unitelabs.cdk import sila
 
 
-class InvalidCommandSequence(sila.DefinedExecutionError):
+class InvalidCommandSequence(Exception):
     """
     The issued command does not follow the sequence of commands for the device according to its role in the labware
     transfer.
     """
 
 
-class LabwareNotPicked(sila.DefinedExecutionError):
+class LabwareNotPicked(Exception):
     """Picking up the labware item from the source device failed."""
 
 
-class LabwareNotPlaced(sila.DefinedExecutionError):
+class LabwareNotPlaced(Exception):
     """Placing the labware item at the destination device failed."""
 
 

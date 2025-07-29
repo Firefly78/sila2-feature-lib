@@ -12,13 +12,13 @@ except ImportError as ex:
 logger = logging.getLogger(__name__)
 
 
-class StartSimulationModeFailed(sila.DefinedExecutionError):
+class StartSimulationModeFailed(Exception):
     """The server cannot change to Simulation Mode.
     This error can, e.g., be thrown, if a real-world process needs to be ended before switching to simulation \
     mode."""
 
 
-class StartRealModeFailed(sila.DefinedExecutionError):
+class StartRealModeFailed(Exception):
     """The server cannot change to Real Mode.
     This error can, e.g. be thrown, if a device is not ready to change into Real Mode.
     """

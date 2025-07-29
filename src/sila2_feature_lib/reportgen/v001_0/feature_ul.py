@@ -8,15 +8,15 @@ except ImportError as ex:
     ) from ex
 
 
-class InvalidParameterError(sila.DefinedExecutionError):
+class InvalidParameterError(Exception):
     """The given parameter is invalid."""
 
 
-class ReportGenerationError(sila.DefinedExecutionError):
+class ReportGenerationError(Exception):
     """An error occurred during report generation."""
 
 
-class InternalError(sila.DefinedExecutionError):
+class InternalError(Exception):
     """An internal error occurred."""
 
 
@@ -39,7 +39,7 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     @sila.UnobservableCommand(
-        display_name="Generate Report",
+        name="Generate Report",
         errors=[InternalError, InvalidParameterError, ReportGenerationError],
     )
     @sila.Response("Report ID")
