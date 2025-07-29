@@ -8,15 +8,15 @@ except ImportError as ex:
     ) from ex
 
 
-class InvalidParameterError(Exception):
+class InvalidParameterError(sila.DefinedExecutionError):
     """The given parameter is invalid."""
 
 
-class ReportGenerationError(Exception):
+class ReportGenerationError(sila.DefinedExecutionError):
     """An error occurred during report generation."""
 
 
-class InternalError(Exception):
+class InternalError(sila.DefinedExecutionError):
     """An internal error occurred."""
 
 
