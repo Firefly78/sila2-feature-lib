@@ -269,15 +269,38 @@ class FeatureGenerator:
         """Get list of types that need to be imported"""
         types = set()
 
-        # Add custom data types
-        for data_type in self.parser.data_types:
-            types.add(data_type['identifier'])
+        # Add types used in command parameters and errors
+        for command in self.parser.commands:
+            # Add parameter types
+            for param in command['parameters']:
+                param_types = self._collect_types_from_data_type(param['data_type'])
+                types.update(param_types)
 
-        # Add execution errors
-        for error in self.parser.execution_errors:
-            types.add(error['identifier'])
+            # Add error types
+            for error in command['errors']:
+                types.add(error['identifier'])
+
+        # Add types used in properties
+        for prop in self.parser.properties:
+            prop_types = self._collect_types_from_data_type(prop['data_type'])
+            types.update(prop_types)
 
         return sorted(list(types))
+
+    def _collect_types_from_data_type(self, data_type_def: dict) -> set[str]:
+        """Recursively collect all custom types used in a data type definition"""
+        types = set()
+
+        if data_type_def['type'] == 'custom':
+            types.add(data_type_def['name'])
+        elif data_type_def['type'] == 'list':
+            inner_types = self._collect_types_from_data_type(data_type_def['inner_type'])
+            types.update(inner_types)
+        elif data_type_def['type'] == 'constrained':
+            base_types = self._collect_types_from_data_type(data_type_def['base_type'])
+            types.update(base_types)
+
+        return types
 
     def _generate_command(self, command: dict) -> list[str]:
         """Generate code for a single command"""
@@ -390,24 +413,91 @@ class SiLATypesGenerator:
         """Generate the sila_types.py content"""
         code_lines = [
             "import dataclasses",
-            "from typing import Annotated"
+            "from typing import Annotated",
             "",
             "from unitelabs.cdk import sila",
             "",
             ""
         ]
 
-        # Generate execution errors
+        # Generate execution errors first (they don't have dependencies)
         for error in self.parser.execution_errors:
             code_lines.extend(self._generate_execution_error(error))
             code_lines.append("")
 
-        # Generate custom data types
-        for data_type in self.parser.data_types:
+        # Generate custom data types in dependency order
+        ordered_types = self._order_types_by_dependencies()
+        for data_type in ordered_types:
             code_lines.extend(self._generate_data_type(data_type))
             code_lines.append("")
 
         return "\n".join(code_lines)
+
+    def _order_types_by_dependencies(self) -> list[dict]:
+        """Order data types so that dependencies are defined before they are used"""
+        # Create a dependency graph
+        dependencies = {}
+        type_dict = {dt['identifier']: dt for dt in self.parser.data_types}
+
+        for data_type in self.parser.data_types:
+            deps = self._find_type_dependencies(data_type)
+            dependencies[data_type['identifier']] = deps
+
+        # Topological sort to order types by dependencies
+        ordered = []
+        visited = set()
+        temp_visited = set()
+
+        def visit(type_id):
+            if type_id in temp_visited:
+                # Circular dependency detected - just continue with original order
+                return
+            if type_id in visited:
+                return
+
+            temp_visited.add(type_id)
+
+            # Visit dependencies first
+            for dep in dependencies.get(type_id, []):
+                if dep in type_dict:  # Only visit if it's a custom type
+                    visit(dep)
+
+            temp_visited.remove(type_id)
+            visited.add(type_id)
+
+            if type_id in type_dict:
+                ordered.append(type_dict[type_id])
+
+        # Visit all types
+        for data_type in self.parser.data_types:
+            visit(data_type['identifier'])
+
+        return ordered
+
+    def _find_type_dependencies(self, data_type: dict) -> set[str]:
+        """Find all custom type dependencies for a given data type"""
+        dependencies = set()
+
+        for element in data_type['definition']:
+            deps = self._find_data_type_dependencies(element['data_type'])
+            dependencies.update(deps)
+
+        return dependencies
+
+    def _find_data_type_dependencies(self, data_type_def: dict) -> set[str]:
+        """Recursively find all custom type dependencies in a data type definition"""
+        dependencies = set()
+
+        if data_type_def['type'] == 'custom':
+            dependencies.add(data_type_def['name'])
+        elif data_type_def['type'] == 'list':
+            inner_deps = self._find_data_type_dependencies(data_type_def['inner_type'])
+            dependencies.update(inner_deps)
+        elif data_type_def['type'] == 'constrained':
+            base_deps = self._find_data_type_dependencies(data_type_def['base_type'])
+            dependencies.update(base_deps)
+
+        return dependencies
 
     def _generate_execution_error(self, error: dict) -> list[str]:
         """Generate code for an execution error"""
