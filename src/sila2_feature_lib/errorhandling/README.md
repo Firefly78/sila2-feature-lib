@@ -42,9 +42,11 @@ async def MyMethod():
 
     # Or accomplish the same thing more hands-on
     while True:
-        await work(1)
-        if not await ErrorHandler.try_again(Exception("Something bad"))
-            break
+        try:
+            await work(1)
+        except Exception as ex:
+            if not await ErrorHandler.try_again(ex)
+                break
 
     # Or maybe do a cancelToken type approach?
     work
@@ -54,7 +56,7 @@ async def MyMethod():
 ```python
 
 @dataclass
-class ErrorItem:
+class ErrorItem(sila.CustomDataType):
     error_uuid: str # Unique identifier
     command_identifier : str # Reference to the sila command that has failed
     call_identifier: str # Reference to the call that has failed
