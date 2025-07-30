@@ -56,6 +56,8 @@ async def MyMethod():
 
     # Could it be integrated into the status object of the ObservableCommand ??
 
+    # TODO: Consider functions for reporting errors without waiting for it to be resolved.
+
 ```
 
 ## Feature details (Unitelabs SiLA Framework)
