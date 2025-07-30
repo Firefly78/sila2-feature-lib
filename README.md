@@ -47,6 +47,18 @@ TBD
 
 ## Change log
 
+### v2025.30
+
+- Various fixes related to breaking changes in unitelabs-cdk / unitelabs-sila packages
+
+### v2025.7
+
+- Improved error handling in `ResourcesService`
+
+### v2024.49
+
+- `dynamic_import_config` functions extended with more funcionality.
+
 ### v2024.46
 
 - Updated all features from the old `unitelabs-connector-framework` to the newer `unitelabs-cdk` package

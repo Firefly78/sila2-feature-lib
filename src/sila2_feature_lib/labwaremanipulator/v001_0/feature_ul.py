@@ -139,14 +139,12 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
         .. parameter:: Indicates the position the labware has been removed from.
         """
 
-    @abstractmethod
-    @sila.UnobservableProperty(display_name="Available Handover Positions")
-    async def AvailableHandoverPositions(self) -> typing.List[HandoverPosition]:
-        """
-        All handover positions of the device including the number of sub-positions.
-        """
+    @abc.abstractmethod
+    @sila.UnobservableProperty(name="Available Handover Positions")
+    async def AvailableHandoverPositions(self) -> list[HandoverPosition]:
+        """All handover positions of the device including the number of sub-positions."""
 
-    @sila.UnobservableProperty(display_name="Number Of Internal Positions")
+    @sila.UnobservableProperty(name="Number Of Internal Positions")
     async def NumberOfInternalPositions(
         self,
     ) -> typing.Annotated[int, sila.constraints.MinimalInclusive(1)]:
@@ -154,3 +152,15 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
         The number of internal positions the device has.
         """
         return 1  # Default (not used)
+
+    @sila.UnobservableProperty(name="Available Intermediate Actions")
+    async def AvailableIntermediateActions(
+        self,
+    ) -> list[
+        typing.Annotated[
+            str,
+            sila.constraints.FullyQualifiedIdentifier(value="CommandIdentifier"),
+        ]
+    ]:
+        """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
+        return []  # Default (not used)
