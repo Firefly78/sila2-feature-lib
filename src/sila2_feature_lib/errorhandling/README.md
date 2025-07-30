@@ -53,6 +53,8 @@ async def MyMethod():
 
 ```
 
+## Feature details (Unitelabs SiLA Framework)
+
 ```python
 
 @dataclass
