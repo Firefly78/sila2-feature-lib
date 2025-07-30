@@ -6,12 +6,10 @@
 import asyncio
 from unitelabs.cdk import Connector
 
-from sila2_feature_lib.datastore.v001_0.feature_ul import DataStoreService
-from sila2_feature_lib.datastore.v001_0.feature_ul.extras.resource_handle import ResourceHandle
+from sila2_feature_lib.errorhandling.v001_0.feature_ul import ErrorHandlingService
 
 # Create SiLA server
 app = Connector({...})
-
 
 # Create feature
 error_handling_feat = ErrorHandlingService()
@@ -56,10 +54,7 @@ async def MyMethod():
 
     await my_work(2) # Handle error here
 
-
-
-    # Or maybe do a cancelToken type approach?
-    work
+    # Could it be integrated into the status object of the ObservableCommand ??
 
 ```
 
