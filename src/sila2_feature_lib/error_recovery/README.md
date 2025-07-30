@@ -1,4 +1,4 @@
-# Error Handling Feature (V1.0)
+# Error Recovery Feature (V1.0)
 
 ## Example usage (Unitelabs SiLA2 framework)
 
@@ -6,13 +6,13 @@
 import asyncio
 from unitelabs.cdk import Connector
 
-from sila2_feature_lib.errorhandling.v001_0.feature_ul import ErrorHandlingService
+from sila2_feature_lib.error_recovery.v001_0.feature_ul import ErrorRecoveryService
 
 # Create SiLA server
 app = Connector({...})
 
 # Create feature
-error_handling_feat = ErrorHandlingService()
+error_handling_feat = ErrorRecoveryService()
 
 # Add feature to SiLA server
 app.register(error_handling_feat)
@@ -32,23 +32,23 @@ async def work(input :int):
 async def MyMethod():
     # Choose to raise or not...from an exception
     await work(1)
-    await ErrorHandler.simple(Exception("Something bad happended"), always_raise = false, timeout=None)
+    await ErrorRecovery.simple(Exception("Something bad happended"), always_raise = false, timeout=None)
     await work(1)
 
     # Or run a piece of code, and handle any exception raised - easy to re-run or skip ahead on error
-    result = await ErrorHandle.run(lambda: work(1), enable_retry = true)
+    result = await ErrorRecovery.run(lambda: work(1), enable_retry = true)
 
     # Or accomplish the same thing more hands-on
     while True:
         try:
             await work(1)
         except Exception as ex:
-            if not await ErrorHandler.try_again(ex)
+            if not await ErrorRecovery.try_again(ex)
                 break
 
 
     # Decorator approach
-    @ErrorHandle.wrap(max_retries = 3, timeout=1800)
+    @ErrorRecovery.wrap(max_retries = 3, timeout=1800)
     async def my_work(input: int):
         pass
 
@@ -72,12 +72,12 @@ class ErrorItem(sila.CustomDataType):
     name: str # Error title - typically the type of Error, e.g. KeyError
     description: str # More detailed descritpion of the error.
 
-    # Things to do about it
+    # Actions user is allowed to do to fix it
     available_actions: List[str] # Any combination of "retry", "skip", "error"
 
 
 @sila.Feature
-class ErrorHandlingService(sila.Feature):
+class ErrorRecoveryService(sila.Feature):
     @ObservableProperty()
     async def pending_errors() -> List[ErrorItem]:
         pass
