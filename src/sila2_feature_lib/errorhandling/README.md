@@ -48,6 +48,16 @@ async def MyMethod():
             if not await ErrorHandler.try_again(ex)
                 break
 
+
+    # Decorator approach
+    @ErrorHandle.wrap(max_retries = 3, timeout=1800)
+    async def my_work(input: int):
+        pass
+
+    await my_work(2) # Handle error here
+
+
+
     # Or maybe do a cancelToken type approach?
     work
 
