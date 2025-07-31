@@ -1,7 +1,6 @@
 import logging
-import typing
 from abc import ABCMeta, abstractmethod
-
+from typing import Annotated
 from unitelabs.cdk import sila
 
 from .types.sila_types import HandoverPosition, InvalidCommandSequence, PositionIndex
@@ -73,84 +72,90 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
     @sila.ObservableCommand(name="Prepare For Input", errors=[InvalidCommandSequence])
     async def PrepareForInput(
         self,
-        HandoverPosition: HandoverPosition,
-        InternalPosition: PositionIndex,
-        LabwareType: str,
-        LabwareUniqueID: str,
+        Handoverposition: HandoverPosition,
+        Internalposition: PositionIndex,
+        Labwaretype: str,
+        Labwareuniqueid: str,
         *,
         status: sila.Status,
     ) -> None:
         """
-        Put the device into a state in which it is ready to accept new labware at the specified handover position.
+        Put the device into a state in which it is ready to accept new labware at the specified
+        handover position.
 
         .. parameter:: Indicates the position where the labware will be handed over.
-        .. parameter:: Indicates the position which the labware will be stored at within the device, e.g. internal
-                       storage positions of an incubator.
-        .. parameter:: Specifies the type of labware that will be handed over to transfer information about the
-                       labware that the device might need to handle it correctly.
-        .. parameter:: Represents the unique identification of a labware in the controlling system. It is assigned
-                       by the system and must remain unchanged during the whole process.
+        .. parameter:: Indicates the position which the labware will be stored at within the device,
+        e.g. internal storage positions of an incubator.
+        .. parameter:: Specifies the type of labware that will be handed over to transfer
+        information about the labware that the device might need to handle it correctly.
+        .. parameter:: Represents the unique identification of a labware in the controlling system.
+        It is assigned by the system and must remain unchanged during the whole process.
         """
+        raise NotImplementedError
 
+    @abstractmethod
     @sila.ObservableCommand(name="Prepare For Output", errors=[InvalidCommandSequence])
     async def PrepareForOutput(
         self,
-        HandoverPosition: HandoverPosition,
-        InternalPosition: PositionIndex,
+        Handoverposition: HandoverPosition,
+        Internalposition: PositionIndex,
         *,
         status: sila.Status,
     ) -> None:
         """
-        Put the device into a state in which it is ready to release the labware at the specified handover position.
+        Put the device into a state in which it is ready to release the labware at the specified
+        handover position.
 
         .. parameter:: Indicates the position where the labware will be handed over.
-        .. parameter:: Indicates the position which the labware will be retrieved from within the device, e.g. internal \
-              storage positions of an incubator.
-
+        .. parameter:: Indicates the position which the labware will be retrieved from within the
+        device, e.g. internal storage positions of an incubator.
         """
+        raise NotImplementedError
 
     @abstractmethod
     @sila.ObservableCommand(name="Labware Delivered", errors=[InvalidCommandSequence])
     async def LabwareDelivered(
         self,
-        HandoverPosition: HandoverPosition,
+        Handoverposition: HandoverPosition,
         *,
         status: sila.Status,
-    ):
+    ) -> None:
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare \
-              For Input" command)
+        Notifies the passive destination device of a labware item that has been transferred to it
+        (sent after a "Prepare For Input" command)
 
         .. parameter:: Indicates the position the labware item has been delivered to.
         """
+        raise NotImplementedError
 
     @abstractmethod
     @sila.ObservableCommand(name="Labware Removed", errors=[InvalidCommandSequence])
     async def LabwareRemoved(
         self,
-        HandoverPosition: HandoverPosition,
+        Handoverposition: HandoverPosition,
         *,
         status: sila.Status,
-    ):
+    ) -> None:
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For \
-              Output" command).
+        Notifies the passive source device of a labware item that has been removed from it (sent
+        after a "Prepare For Output" command).
 
         .. parameter:: Indicates the position the labware has been removed from.
         """
+        raise NotImplementedError
 
     @abstractmethod
     @sila.UnobservableProperty(name="Available Handover Positions")
-    async def AvailableHandoverPositions(self) -> typing.List[HandoverPosition]:
+    async def AvailableHandoverPositions(self) -> list[HandoverPosition]:
         """
         All handover positions of the device including the number of sub-positions.
         """
+        raise NotImplementedError
 
+    @abstractmethod
     @sila.UnobservableProperty(name="Number Of Internal Positions")
-    async def NumberOfInternalPositions(
-        self,
-    ) -> typing.Annotated[int, sila.constraints.MinimalInclusive(1)]:
+    async def NumberOfInternalPositions(self) -> Annotated[int, sila.constraints.MinimalInclusive(1)]:
         """
         The number of internal positions the device has.
         """
-        return 1  # Default (not used)
+        raise NotImplementedError
