@@ -7,7 +7,7 @@ on:
   push:
   workflow_call:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   build:
