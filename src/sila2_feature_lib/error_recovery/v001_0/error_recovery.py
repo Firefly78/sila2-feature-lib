@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorRecoverySingleton:
+    """
+    Singleton pattern implementation for ErrorRecoveryManager.
+
+    Ensures only one instance of ErrorRecoveryManager exists throughout the application lifecycle.
+    """
+
     _instance: Optional[ErrorRecoveryManager] = None
 
     @classmethod
@@ -31,6 +37,14 @@ class ErrorRecoverySingleton:
 
 
 class ErrorRecoveryManager:
+    """
+    Core manager for error recovery operations.
+
+    Manages error entries, provides error handling functionality, and coordinates
+    between error producers and consumers. Implements a singleton pattern through
+    ErrorRecoverySingleton to ensure consistent state across the application.
+    """
+
     def __init__(self):
         # Ensure that the instance is created only once.
         if ErrorRecoverySingleton._instance is not None:
@@ -41,7 +55,13 @@ class ErrorRecoveryManager:
 
         self._listeners: List[Event] = []
 
-    def clear_errors(self, predicate: Callable[[ErrorEntry], bool]):
+    def clear_errors(self, predicate: Optional[Callable[[ErrorEntry], bool]] = None):
+        """
+        Clear errors that match the given predicate, all errors if no predicate is provided.
+
+        Args:
+            predicate: Optional function that returns True for errors to be removed
+        """
         to_be_removed = filter(predicate, self._errors)
         if not to_be_removed:
             return
@@ -58,6 +78,15 @@ class ErrorRecoveryManager:
         self,
         predicate: Optional[Callable[[ErrorEntry], bool]] = None,
     ) -> list[ErrorEntry]:
+        """
+        Get errors optionally filtered by a predicate.
+
+        Args:
+            predicate: Optional filter function. If None, returns all errors.
+
+        Returns:
+            List of error entries matching the predicate (or all if no predicate)
+        """
         if predicate is None:
             return self._errors.copy()
         return list(filter(predicate, self._errors))
@@ -68,7 +97,20 @@ class ErrorRecoveryManager:
         return ErrorRecoverySingleton._get_instance()
 
     def push_error(self, err: ErrorEntry):
-        """Push an error entry to the error recovery system."""
+        """
+        Push an error entry to the error recovery system.
+
+        Since an error is referenced by its command execution UUID,
+        only one error per command can exist at a time. If an error
+        already exists for the same command execution UUID, it will
+        be replaced.
+
+        Args:
+            err: The error entry to add
+
+        Returns:
+            The error entry that was added
+        """
 
         # Since an error is referenced by its command execution UUID,
         # we cannot have more than one error per command at a time
@@ -88,11 +130,26 @@ class ErrorRecoveryManager:
         return err
 
     def register_listener(self, listener: Event) -> Event:
+        """
+        Register an event listener for error state changes.
+
+        Args:
+            listener: Event object to be notified of changes
+
+        Returns:
+            The registered listener event
+        """
         self._listeners.append(listener)
         logging.info("%d listeners registered", len(self._listeners))
         return listener
 
     def unregister_listener(self, listener: Event) -> None:
+        """
+        Unregister an event listener.
+
+        Args:
+            listener: Event object to remove from listeners
+        """
         if listener in self._listeners:
             self._listeners.remove(listener)
             logging.info("%d listeners registered", len(self._listeners))
@@ -104,6 +161,26 @@ class ErrorRecoveryManager:
 
 @asynccontextmanager
 async def context_error_recovery(status: sila.Status):
+    """
+    Async context manager for error recovery operations.
+
+    Creates an ErrorRecovery instance for the duration of the context,
+    ensuring proper cleanup when the context exits.
+
+    Example usage:
+    ```python
+    async with context_error_recovery(status) as error_recovery:
+        err = error_recovery.push_error(Exception("Test exception"), ...)
+        print("Something went wrong, let's have the user handle it...")
+        await err.wait_for_continuation()
+    ```
+
+    Args:
+        status: SiLA status object containing command execution information
+
+    Yields:
+        ErrorRecovery instance for handling errors within the context
+    """
     err = ErrorRecovery(status)
     try:
         err.open()
@@ -114,19 +191,41 @@ async def context_error_recovery(status: sila.Status):
 
 
 class ErrorRecovery:
+    """
+    Error recovery handler for individual command executions.
+
+    Provides methods to handle errors during command execution, including
+    pushing errors to the recovery manager and waiting for resolution.
+    Each instance is tied to a specific command execution identified by UUID.
+
+    Attributes:
+        cmd_identifier: Fully qualified identifier of the associated command
+        cmdexecution_uuid: UUID of the command execution
+        id: Unique identifier for this ErrorRecovery instance
+    """
+
     @property
     def cmd_identifier(self) -> str:
+        """Get the command identifier."""
         return self.__cmd_identifier
 
     @property
     def cmdexecution_uuid(self) -> str:
+        """Get the command execution UUID."""
         return self.__cmdexecution_uuid
 
     @property
     def id(self) -> str:
+        """Get the unique identifier for this ErrorRecovery instance."""
         return self.__id
 
     def __init__(self, status: sila.Status):
+        """
+        Initialize ErrorRecovery instance.
+
+        Args:
+            status: SiLA status object containing command execution information
+        """
         self.__id = str(uuid4())
         self.__cmd_identifier = str(
             status.command_execution.command.fully_qualified_identifier
@@ -136,9 +235,11 @@ class ErrorRecovery:
         self.__manager = ErrorRecoveryManager.get_global_instance()
 
     def open(self):
+        """Open the error recovery context."""
         pass  # Nothing
 
     def close(self):
+        """Close the error recovery context and clear associated errors."""
         self.__manager.clear_errors(lambda e: e.creator_instance_id == self.id)
 
     async def wait_resolve(
@@ -149,8 +250,16 @@ class ErrorRecovery:
         automation_selection_timeout: Optional[float],
     ) -> Optional[Continuation]:
         """
-        Handle an exception by pushing it to the error recovery manager,
-        and waiting for it to be resolved.
+        Handle an exception by pushing it to the error recovery manager and waiting for resolution.
+
+        Args:
+            exception: The exception that occurred
+            continuation_options: List of available continuation options
+            default_option: Default continuation option to use if timeout occurs
+            automation_selection_timeout: Timeout in seconds for automatic resolution
+
+        Returns:
+            The selected continuation option, or None if cancelled
         """
         err = self.__manager.push_error(
             ErrorEntry.create(
@@ -171,7 +280,16 @@ class ErrorRecovery:
         automation_selection_timeout: Optional[float],
     ) -> ErrorEntry:
         """
-        Push an error to the error recovery manager and return straight away.
+        Push an error to the error recovery manager and return immediately.
+
+        Args:
+            ex: The exception that occurred
+            continuation_options: List of available continuation options
+            default_option: Default continuation option to use if timeout occurs
+            automation_selection_timeout: Timeout in seconds for automatic resolution
+
+        Returns:
+            The created ErrorEntry
         """
         return self.__manager.push_error(
             ErrorEntry.create(
@@ -185,6 +303,29 @@ class ErrorRecovery:
 
     @classmethod
     def wrap(cls):
+        """
+        Decorator factory for wrapping functions with error recovery context.
+
+        Returns a decorator that automatically creates an ErrorRecovery context
+        for the decorated function, ensuring proper error handling setup and cleanup.
+
+        Example usage:
+        ```python
+        @ErrorRecovery.wrap()
+        async def my_command_handler(*args, status: sila.Status, error_recovery: ErrorRecovery | None = None, **kwargs):
+            await error_recovery.wait_resolve(Exception("Test exception"), ...)
+        ```
+        is equivalent to:
+        ```python
+        async def my_command_handler(*args, status: sila.Status, **kwargs):
+            async with context_error_recovery(status) as error_recovery:
+                await error_recovery.wait_resolve(Exception("Test exception"), ...)
+        ```
+
+        Returns:
+            Decorator function that wraps the target function with error recovery
+        """
+
         def f(func):
             async def wrapper(
                 *args,
@@ -211,6 +352,29 @@ class ErrorRecovery:
 
 @dataclass
 class ErrorEntry:
+    """
+    Represents a recoverable error entry in the error recovery system.
+
+    Contains all information about an error including its context, possible
+    continuation options, and resolution state. Used to track errors from
+    occurrence through resolution.
+
+    Attributes:
+        error_identifier: Unique identifier for the error type
+        command_identifier: Identifier of the command that produced the error
+        command_execution_uuid: UUID of the command execution
+        error_time: Timestamp when the error occurred
+        error_message: Human-readable error description
+        error: The actual exception object
+        continuation_options: Available options for error recovery
+        default_option: Default continuation option
+        automation_selection_timeout: Timeout for automatic option selection
+        creator_instance_id: ID of the ErrorRecovery instance that created this entry
+        selected_continuation: The continuation option selected for resolution
+        resolution: Resolution object containing input data
+        resolved: Event signaling when the error has been resolved
+    """
+
     error_identifier: str
     command_identifier: str
     command_execution_uuid: str
@@ -222,8 +386,7 @@ class ErrorEntry:
     automation_selection_timeout: float
 
     # Internal stuffs
-    creator_instance_id: str
-    # resolved: bool = False
+    creator_instance_id: str  # ErrorRecovery instance ID
     selected_continuation: Optional[Continuation] = None
     resolution: Optional[Resolution] = None
     resolved: Event = field(default_factory=Event)
@@ -238,6 +401,19 @@ class ErrorEntry:
         default_option: Continuation,
         automation_selection_timeout: Optional[float] = None,
     ) -> "ErrorEntry":
+        """
+        Create a new ErrorEntry from an exception and error recovery context.
+
+        Args:
+            ex: The exception that occurred
+            err: ErrorRecovery instance providing context
+            continuation_options: Available continuation options
+            default_option: Default continuation option
+            automation_selection_timeout: Timeout for automatic selection (uses manager default if None)
+
+        Returns:
+            New ErrorEntry instance
+        """
         timeout = (
             err.__manager.get_default_timeout()
             if automation_selection_timeout is None
@@ -300,6 +476,16 @@ class ErrorEntry:
         return list(filter(predicate, self.continuation_options))
 
     def resolve(self, resolution: Resolution, continuation: Continuation):
+        """
+        Resolve the error with the specified continuation and resolution data.
+
+        Args:
+            resolution: Resolution object
+            continuation: Selected continuation option
+
+        Raises:
+            ValueError: If the continuation is not in the available options
+        """
         if (
             continuation not in self.continuation_options
             and continuation != CONTINUATION_CANCELLED
@@ -339,36 +525,69 @@ class ErrorEntry:
                 return None
 
         continuation = self.get_continuation()
-        if continuation.config == ContinuationAction.RaiseInternalError:
-            raise (
-                self.error
-                if self.error
-                else RuntimeError("Internal error: Missing error object.")
-            )
+        if continuation.auto_raise:
+            raise (self.error)
         return continuation
 
 
-class ContinuationAction(Enum):
+class ContinuationActionHint(Enum):
+    """
+    Hints for the continuation action to be taken.
+
+    These are used to determine how the continuation should be handled by the caller.
+
+    Values:
+        Nothing: No specific action required
+        Continue: Continue with normal execution
+        RaiseError: Re-raise the original error
+        Retry: Retry the failed operation
+    """
+
     Nothing = auto()
+    Continue = auto()
     RaiseError = auto()
-    RaiseInternalError = auto()
-    DropError = auto()
     Retry = auto()
 
 
 @dataclass
 class Continuation:
+    """
+    Represents a continuation option for error recovery.
+
+    Defines an action that can be taken to recover from an error,
+    including description, required input data, and behavior hints.
+
+    Attributes:
+        description: Human-readable description of the continuation option
+        identifier: Unique identifier for this continuation option
+        required_input_data: Description of any required input data format
+        config: Hint for how this continuation should be handled
+        auto_raise: Whether to automatically re-raise the original error
+    """
+
     description: str
     identifier: str = field(default_factory=lambda: str(uuid4()))
     required_input_data: str = ""
 
     # Additional things to trigger with this continuation
-    # Note: Anything but RaiseInternalError is up to the caller to handle
-    config: ContinuationAction = ContinuationAction.Nothing
+    config: ContinuationActionHint = ContinuationActionHint.Nothing
+    auto_raise: bool = (
+        False  # Automatically re-raise the original error if this continuation is selected
+    )
 
 
 @dataclass
 class Resolution:
+    """
+    Contains resolution data for an error recovery action.
+
+    Holds any input data provided by the client when selecting
+    a continuation option.
+
+    Attributes:
+        input_data: Optional input data string for the resolution
+    """
+
     input_data: Optional[str] = None
 
     @classmethod
@@ -379,5 +598,5 @@ class Resolution:
 
 CONTINUATION_CANCELLED = Continuation(
     "Cancelled",
-    config=ContinuationAction.RaiseInternalError,
+    auto_raise=True,
 )

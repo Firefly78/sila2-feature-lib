@@ -2,15 +2,15 @@ from unitelabs.cdk import Connector, sila
 
 from sila2_feature_lib.error_recovery.v001_0.error_recovery import (
     Continuation,
-    ContinuationAction,
+    ContinuationActionHint,
     ErrorRecovery,
     Resolution,
 )
 from sila2_feature_lib.error_recovery.v001_0.feature_ul import ErrorRecoveryService
 
-opt1 = Continuation(description="Bail!", config=ContinuationAction.RaiseInternalError)
-opt2 = Continuation(description="Option 1", required_input_data="<xml>...</xml>")
-opt3 = Continuation(description="Option 2")
+opt1 = Continuation(description="Bail!", auto_raise=True)
+opt2 = Continuation(description="Try this", required_input_data="<xml>...</xml>")
+opt3 = Continuation(description="Try again", config=ContinuationActionHint.Retry)
 
 
 MY_CONTINUATIONS = [opt1, opt2, opt3]
