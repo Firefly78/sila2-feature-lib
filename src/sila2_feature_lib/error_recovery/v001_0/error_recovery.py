@@ -4,7 +4,7 @@ import asyncio
 import functools
 import logging
 from asyncio import Event
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
@@ -129,7 +129,24 @@ class ErrorRecoveryManager:
             listener.set()
         return err
 
-    def register_listener(self, listener: Event) -> Event:
+    @contextmanager
+    def subscribe_to_changes(self):
+        """
+        Context manager to get a listener for error state changes.
+
+        This method contextualizes the registration and unregistration of an event listener.
+
+        Yields:
+            An event that can be used to wait for error state changes
+        """
+        listener = Event()
+        self._register_listener(listener)
+        try:
+            yield listener
+        finally:
+            self._unregister_listener(listener)
+
+    def _register_listener(self, listener: Event) -> Event:
         """
         Register an event listener for error state changes.
 
@@ -143,7 +160,7 @@ class ErrorRecoveryManager:
         logging.info("%d listeners registered", len(self._listeners))
         return listener
 
-    def unregister_listener(self, listener: Event) -> None:
+    def _unregister_listener(self, listener: Event) -> None:
         """
         Unregister an event listener.
 

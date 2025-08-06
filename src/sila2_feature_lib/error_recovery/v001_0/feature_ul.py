@@ -1,4 +1,3 @@
-import asyncio
 from typing import AsyncGenerator
 
 from unitelabs.cdk import sila
@@ -62,10 +61,11 @@ class ErrorRecoveryService(Base):
     @sila.ObservableProperty(name="Recoverable Errors")
     async def RecoverableErrors(self) -> AsyncGenerator[list[RecoverableError], None]:
         manager = self.error_recovery_manager.get_global_instance()
-        listener = manager.register_listener(asyncio.Event())
-        try:
+
+        # Subscribe to changes in error states
+        with manager.subscribe_to_changes() as listener:
             while True:
-                errors = ErrorRecoveryManager.get_global_instance().get_errors()
+                errors = manager.get_errors()
                 yield [
                     RecoverableError(
                         ErrorIdentifier=e.error_identifier,
@@ -86,7 +86,7 @@ class ErrorRecoveryService(Base):
                     )
                     for e in errors
                 ]
+
+                # Wait for the listener to be notified of changes
                 await listener.wait()
                 listener.clear()
-        finally:
-            manager.unregister_listener(listener)
