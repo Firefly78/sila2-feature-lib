@@ -39,7 +39,7 @@ class ErrorRecoveryService(Base):
             lambda o: o.identifier == ContinuationOption
         )[0]
 
-        my_error.resolve(Resolution(InputData), continuation)
+        my_error.post_resolution(Resolution(InputData), continuation)
 
     @sila.UnobservableCommand(
         name="Abort Error Handling", errors=[InvalidCommandExecutionUUID]

@@ -55,8 +55,10 @@ class TestController(sila.Feature):
         error_recovery: ErrorRecovery,  # Object to manage error recovery
         status: sila.Status,
     ):
-        # Single-line - wait for error resolution, function returns the selected continuation once resolved
-        _ = await error_recovery.wait_resolve(Exception("Test exception"), **CONFIG)
+        # Single-line - post error, function returns the selected continuation once selected
+        _ = await error_recovery.wait_for_continuation(
+            Exception("Test exception"), **CONFIG
+        )
 
         # Interactive error handling - return an error object for further interaction
         err = error_recovery.push_error(Exception("Test exception 2"), **CONFIG)
@@ -64,19 +66,19 @@ class TestController(sila.Feature):
         # Wait for error to be resolved by user
         if await err.wait_for_continuation(1800):  # 30 min, returns None if timed out
             print("Error resolved successfully")
-            print(f"Continuation: {err.get_continuation()}")
+            print(f"Continuation: {err.get_selected_continuation()}")
         else:
             print("Error resolution timed out")
 
-        # Check if resolved
-        if err.is_resolved():
-            print("Error is resolved")
+        # Check if resolution is available
+        if err.is_resolution_available():
+            print("Resolution is available")
         else:
-            print("Error is not resolved")
+            print("Resolution is not available")
 
         # We can programmatically resolve the error if we want
-        if not err.is_resolved():
-            err.resolve(Resolution.empty(), opt2)
+        if not err.is_resolution_available():
+            err.post_resolution(Resolution.empty(), opt2)
 
         # Or just cancel it - will cause all wait_for_continuation calls to raise an exception
         err.clear()

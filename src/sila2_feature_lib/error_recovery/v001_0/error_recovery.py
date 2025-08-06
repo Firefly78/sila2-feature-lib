@@ -242,7 +242,7 @@ class ErrorRecovery:
         """Close the error recovery context and clear associated errors."""
         self.__manager.clear_errors(lambda e: e.creator_instance_id == self.id)
 
-    async def wait_resolve(
+    async def wait_for_continuation(
         self,
         exception: Exception,
         continuation_options: List[Continuation],
@@ -389,7 +389,7 @@ class ErrorEntry:
     creator_instance_id: str  # ErrorRecovery instance ID
     selected_continuation: Optional[Continuation] = None
     resolution: Optional[Resolution] = None
-    resolved: Event = field(default_factory=Event)
+    resolution_available: Event = field(default_factory=Event)
 
     @classmethod
     def create(
@@ -435,13 +435,13 @@ class ErrorEntry:
 
     def clear(self):
         """Clear the error entry. Any 'waiting for continuation' will raise a `CancellationError`."""
-        if not self.is_resolved():
-            self.resolve(Resolution.empty(), CONTINUATION_CANCELLED)
-            self.resolved.set()
+        if not self.is_resolution_available():
+            self.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
+            self.resolution_available.set()
 
-    def is_resolved(self) -> bool:
+    def is_resolution_available(self) -> bool:
         """Check if the error entry is resolved."""
-        if self.resolved.is_set():
+        if self.resolution_available.is_set():
             return True
 
         # Check for automation selection timeout
@@ -451,13 +451,13 @@ class ErrorEntry:
                 datetime.now(timezone.utc) - self.error_time
             ).total_seconds()
             if elapsed_time > self.automation_selection_timeout:
-                self.resolve(Resolution.empty(), self.default_option)
+                self.post_resolution(Resolution.empty(), self.default_option)
 
-        return self.resolved.is_set()
+        return self.resolution_available.is_set()
 
-    def get_continuation(self) -> Continuation:
+    def get_selected_continuation(self) -> Continuation:
         """Get the continuation for this error entry. Will raise a `RuntimeError` if not resolved."""
-        if not self.resolved:
+        if not self.resolution_available:
             raise RuntimeError("Cannot get continuation for unresolved error.")
 
         if self.selected_continuation is None:
@@ -475,9 +475,9 @@ class ErrorEntry:
             return self.continuation_options
         return list(filter(predicate, self.continuation_options))
 
-    def resolve(self, resolution: Resolution, continuation: Continuation):
+    def post_resolution(self, resolution: Resolution, continuation: Continuation):
         """
-        Resolve the error with the specified continuation and resolution data.
+        Post a resolution for this error entry with the selected continuation.
 
         Args:
             resolution: Resolution object
@@ -497,7 +497,7 @@ class ErrorEntry:
         self.selected_continuation = continuation
         self.resolution = resolution
 
-        self.resolved.set()
+        self.resolution_available.set()
 
     async def wait_for_continuation(
         self,
@@ -516,15 +516,15 @@ class ErrorEntry:
 
         if timeout == 0:
             # Wait indefinitely
-            await self.resolved.wait()
+            await self.resolution_available.wait()
         else:
             try:
                 # Wait with timeout
-                await asyncio.wait_for(self.resolved.wait(), timeout)
+                await asyncio.wait_for(self.resolution_available.wait(), timeout)
             except asyncio.TimeoutError:
                 return None
 
-        continuation = self.get_continuation()
+        continuation = self.get_selected_continuation()
         if continuation.auto_raise:
             raise (self.error)
         return continuation
@@ -569,11 +569,10 @@ class Continuation:
     identifier: str = field(default_factory=lambda: str(uuid4()))
     required_input_data: str = ""
 
-    # Additional things to trigger with this continuation
+    # Hints for how this continuation should be handled (optional)
     config: ContinuationActionHint = ContinuationActionHint.Nothing
-    auto_raise: bool = (
-        False  # Automatically re-raise the original error if this continuation is selected
-    )
+    # Automatically re-raise the original error if this continuation is selected
+    auto_raise: bool = False
 
 
 @dataclass
