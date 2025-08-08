@@ -67,7 +67,7 @@ class ErrorRecoveryManager:
             return
 
         for e in to_be_removed:
-            e.clear()
+            e.mark_resolved()
             self._errors.remove(e)
 
         # Notify all listeners that errors have been cleared
@@ -120,8 +120,12 @@ class ErrorRecoveryManager:
             lambda e: e.command_execution_uuid == err.command_execution_uuid
         )
         if old_err:
+            logger.warning(
+                "Old error was never resolved, new error will replace it. (%s)",
+                err.command_execution_uuid,
+            )
             self._errors.remove(old_err[0])
-            old_err[0].clear()
+            old_err[0].mark_resolved()
         self._errors.append(err)
 
         # TODO: Notify the UI or other components about the new error
@@ -177,7 +181,7 @@ class ErrorRecoveryManager:
 
 
 @asynccontextmanager
-async def context_error_recovery(status: sila.Status):
+async def context_error_recovery(status: sila.Status, *, auto_resolve: bool = False):
     """
     Async context manager for error recovery operations.
 
@@ -194,6 +198,7 @@ async def context_error_recovery(status: sila.Status):
 
     Args:
         status: SiLA status object containing command execution information
+        auto_resolve: If True, automatically marks an error as resolved on continuation selection
 
     Yields:
         ErrorRecovery instance for handling errors within the context
@@ -222,6 +227,16 @@ class ErrorRecovery:
     """
 
     @property
+    def auto_resolve(self) -> bool:
+        """Get the auto-resolve flag, which determines if the error is automatically resolved on continuation selection."""
+        return self.__auto_resolve
+
+    @auto_resolve.setter
+    def auto_resolve(self, value: bool):
+        """Set the auto-resolve flag."""
+        self.__auto_resolve = value
+
+    @property
     def cmd_identifier(self) -> str:
         """Get the command identifier."""
         return self.__cmd_identifier
@@ -236,13 +251,15 @@ class ErrorRecovery:
         """Get the unique identifier for this ErrorRecovery instance."""
         return self.__id
 
-    def __init__(self, status: sila.Status):
+    def __init__(self, status: sila.Status, *, auto_resolve: bool = False):
         """
         Initialize ErrorRecovery instance.
 
         Args:
             status: SiLA status object containing command execution information
+            auto_resolve: If True, automatically marks an error as resolved on continuation selection
         """
+        self.__auto_resolve = auto_resolve
         self.__id = str(uuid4())
         self.__cmd_identifier = str(
             status.command_execution.command.fully_qualified_identifier
@@ -251,13 +268,25 @@ class ErrorRecovery:
 
         self.__manager = ErrorRecoveryManager.get_global_instance()
 
+    def close(self):
+        """Close the error recovery context and clear associated errors."""
+        self.__manager.clear_errors(lambda e: e.creator_instance == self.id)
+
+    def get_error(self) -> ErrorEntry:
+        """
+        Get any error associated with this ErrorRecovery instance.
+        Raises `IndexError` if no error is available.
+        """
+        try:
+            return self.__manager.get_errors(
+                lambda e: e.command_execution_uuid == self.cmdexecution_uuid
+            ).pop()
+        except IndexError as e:
+            raise IndexError("No error available") from e
+
     def open(self):
         """Open the error recovery context."""
         pass  # Nothing
-
-    def close(self):
-        """Close the error recovery context and clear associated errors."""
-        self.__manager.clear_errors(lambda e: e.creator_instance_id == self.id)
 
     async def wait_for_continuation(
         self,
@@ -265,6 +294,7 @@ class ErrorRecovery:
         continuation_options: List[Continuation],
         default_option: Continuation,
         automation_selection_timeout: Optional[float],
+        auto_resolve: bool = True,
     ) -> Optional[Continuation]:
         """
         Handle an exception by pushing it to the error recovery manager and waiting for resolution.
@@ -287,7 +317,7 @@ class ErrorRecovery:
                 automation_selection_timeout=automation_selection_timeout,
             )
         )
-        return await err.wait_for_continuation()
+        return await err.wait_for_continuation(auto_resolve=auto_resolve)
 
     def push_error(
         self,
@@ -319,7 +349,7 @@ class ErrorRecovery:
         )
 
     @classmethod
-    def wrap(cls):
+    def wrap(cls, auto_resolve: bool = False):
         """
         Decorator factory for wrapping functions with error recovery context.
 
@@ -328,16 +358,19 @@ class ErrorRecovery:
 
         Example usage:
         ```python
-        @ErrorRecovery.wrap()
+        @ErrorRecovery.wrap(auto_resolve=False)
         async def my_command_handler(*args, status: sila.Status, error_recovery: ErrorRecovery | None = None, **kwargs):
             await error_recovery.wait_resolve(Exception("Test exception"), ...)
         ```
         is equivalent to:
         ```python
         async def my_command_handler(*args, status: sila.Status, **kwargs):
-            async with context_error_recovery(status) as error_recovery:
+            async with context_error_recovery(status, auto_resolve=False) as error_recovery:
                 await error_recovery.wait_resolve(Exception("Test exception"), ...)
         ```
+
+        Args:
+            auto_resolve: If True, automatically marks an error as resolved on continuation selection
 
         Returns:
             Decorator function that wraps the target function with error recovery
@@ -350,7 +383,10 @@ class ErrorRecovery:
                 error_recovery: ErrorRecovery | None = None,
                 **kwargs,
             ):
-                async with context_error_recovery(status) as err:
+                async with context_error_recovery(
+                    status=status,
+                    auto_resolve=auto_resolve,
+                ) as err:
                     if error_recovery is None:
                         error_recovery = err
                     return await func(
@@ -386,7 +422,7 @@ class ErrorEntry:
         continuation_options: Available options for error recovery
         default_option: Default continuation option
         automation_selection_timeout: Timeout for automatic option selection
-        creator_instance_id: ID of the ErrorRecovery instance that created this entry
+        creator_instance: ErrorRecovery instance that created this entry
         selected_continuation: The continuation option selected for resolution
         resolution: Resolution object containing input data
         resolved: Event signaling when the error has been resolved
@@ -403,10 +439,21 @@ class ErrorEntry:
     automation_selection_timeout: float
 
     # Internal stuffs
-    creator_instance_id: str  # ErrorRecovery instance ID
+    creator_instance: ErrorRecovery  # ErrorRecovery instance
     selected_continuation: Optional[Continuation] = None
     resolution: Optional[Resolution] = None
     resolution_available: Event = field(default_factory=Event)
+    _is_resolved: bool = False  # Whether the mark_resolved() method has been called
+
+    def cancel(self):
+        """Cancel the error entry, marking it as resolved."""
+        self.mark_resolved()
+
+    def clear(self):
+        """Clear the error entry from the error recovery manager."""
+        ErrorRecoveryManager.get_global_instance().clear_errors(
+            lambda e: e.command_execution_uuid == self.command_execution_uuid
+        )
 
     @classmethod
     def create(
@@ -447,14 +494,8 @@ class ErrorEntry:
             continuation_options=continuation_options,
             default_option=default_option,
             automation_selection_timeout=timeout,
-            creator_instance_id=err.id,
+            creator_instance=err,
         )
-
-    def clear(self):
-        """Clear the error entry. Any 'waiting for continuation' will raise a `CancellationError`."""
-        if not self.is_resolution_available():
-            self.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
-            self.resolution_available.set()
 
     def is_resolution_available(self) -> bool:
         """Check if the error entry is resolved."""
@@ -473,7 +514,7 @@ class ErrorEntry:
         return self.resolution_available.is_set()
 
     def get_selected_continuation(self) -> Continuation:
-        """Get the continuation for this error entry. Will raise a `RuntimeError` if not resolved."""
+        """Get the continuation for this error entry. Will raise a `RuntimeError` if no continuation is available."""
         if not self.resolution_available:
             raise RuntimeError("Cannot get continuation for unresolved error.")
 
@@ -491,6 +532,19 @@ class ErrorEntry:
         if predicate is None:
             return self.continuation_options
         return list(filter(predicate, self.continuation_options))
+
+    def mark_resolved(self):
+        """Resolve the error and remove it from the error list. Any 'waiting for continuation' will raise a `CancellationError`."""
+        if self._is_resolved:  # Prevent infinite recursion
+            return
+
+        self._is_resolved = True
+
+        if not self.is_resolution_available():
+            self.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
+            self.resolution_available.set()
+
+        self.clear()
 
     def post_resolution(self, resolution: Resolution, continuation: Continuation):
         """
@@ -516,9 +570,16 @@ class ErrorEntry:
 
         self.resolution_available.set()
 
+    def raise_error(self):
+        """Raise the original error associated with this entry."""
+        self.cancel()
+        raise self.error
+
     async def wait_for_continuation(
         self,
         timeout: Optional[float] = None,
+        *,
+        auto_resolve: Optional[bool] = None,
     ) -> Optional[Continuation]:
         """
         Wait for the continuation to be resolved, or until timeout.
@@ -526,6 +587,10 @@ class ErrorEntry:
         If zero is given it will wait indefinitely.
 
         If timeout is reached None is returned, else the selected continuation is returned.
+
+        Args:
+            timeout: Timeout in seconds, if None uses the default timeout
+            auto_resolve: If True, automatically resolves the error when continuation is selected. If None, uses the instance's auto_resolve setting.
         """
 
         if timeout is None:
@@ -539,11 +604,24 @@ class ErrorEntry:
                 # Wait with timeout
                 await asyncio.wait_for(self.resolution_available.wait(), timeout)
             except asyncio.TimeoutError:
-                return None
+                return None  # If timeout reached, return None
 
+        # If we reach here, the resolution is available
         continuation = self.get_selected_continuation()
+
+        # If auto_resolve is enabled, clear the error
+        if auto_resolve is None:
+            if self.creator_instance.auto_resolve:
+                self.mark_resolved()
+        elif auto_resolve:
+            self.mark_resolved()
+
+        # If the continuation has auto_raise set, raise the original error
         if continuation.auto_raise:
+            self.mark_resolved()
             raise (self.error)
+
+        # Return the selected continuation
         return continuation
 
 

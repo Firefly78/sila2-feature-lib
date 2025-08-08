@@ -27,14 +27,14 @@ await app.wait_for_termination()
 ```python
 from sila2_feature_lib.error_recovery.v001_0.error_recovery import (
     Continuation,
-    ContinuationAction,
+    ContinuationActionHint,
     ErrorRecovery,
     Resolution,
 )
 
-opt1 = Continuation(description="Bail!", config=ContinuationAction.RaiseInternalError)
-opt2 = Continuation(description="Option 1", required_input_data="<xml>...</xml>")
-opt3 = Continuation(description="Option 2")
+opt1 = Continuation(description="Bail!", auto_raise=True)
+opt2 = Continuation(description="Try this", required_input_data="<xml>...</xml>")
+opt3 = Continuation(description="Try again", config=ContinuationActionHint.Retry)
 
 
 MY_CONTINUATIONS = [opt1, opt2, opt3]
@@ -56,19 +56,20 @@ class TestController(sila.Feature):
         status: sila.Status,
     ):
         # Single-line - post error, function returns the selected continuation once selected
-        _ = await error_recovery.wait_for_continuation(
-            Exception("Test exception"), **CONFIG
-        )
+        _ = await error_recovery.wait_for_continuation(Exception("Test 1"), **CONFIG)
+        # ... Process the continuation
+        error_recovery.get_error().mark_resolved()  # Then resolve the error
 
         # Interactive error handling - return an error object for further interaction
-        err = error_recovery.push_error(Exception("Test exception 2"), **CONFIG)
+        err = error_recovery.push_error(Exception("Test 2"), **CONFIG)
 
-        # Wait for error to be resolved by user
-        if await err.wait_for_continuation(1800):  # 30 min, returns None if timed out
-            print("Error resolved successfully")
-            print(f"Continuation: {err.get_selected_continuation()}")
+        c = await err.wait_for_continuation(1800)
+        if c == opt1:
+            print("User selected option 1")
+            err.mark_resolved()  # Signal user that we handled the error
+        # handle option 2, 3, ...
         else:
-            print("Error resolution timed out")
+            print("The wait_for_continuation timed out")
 
         # Check if resolution is available
         if err.is_resolution_available():
@@ -76,11 +77,12 @@ class TestController(sila.Feature):
         else:
             print("Resolution is not available")
 
-        # We can programmatically resolve the error if we want
+        # We can programmatically resolve the error with a continuation option
         if not err.is_resolution_available():
             err.post_resolution(Resolution.empty(), opt2)
 
-        # Or just cancel it - will cause all wait_for_continuation calls to raise an exception
-        err.clear()
+        # Finally, we cancel the error
+        # This is done automatically at the end of the command execution
+        err.cancel()
 
 ```

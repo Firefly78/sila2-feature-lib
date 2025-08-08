@@ -2,24 +2,62 @@ from typing import AsyncGenerator
 
 from unitelabs.cdk import sila
 
-from .error_recovery import ErrorRecoveryManager, Resolution
+from .error_recovery import (
+    CONTINUATION_CANCELLED,
+    ErrorEntry,
+    ErrorRecoveryManager,
+    Resolution,
+)
 from .feature_ul_base import ErrorRecoveryServiceBase as Base
 from .types.sila_types import (
     ContinuationOption,
     InvalidCommandExecutionUUID,
     RecoverableError,
     Timeout,
+    UnknownContinuationOption,
 )
+
+
+def get_errors(command_execution_uuid: str):
+    """Retrieve the error entry for a given command execution UUID."""
+    manager = ErrorRecoveryManager.get_global_instance()
+    errors = manager.get_errors(
+        lambda e: e.command_execution_uuid == command_execution_uuid
+    )
+    if len(errors) == 0:
+        raise InvalidCommandExecutionUUID(
+            description=f"No error found for CommandExecutionUUID: {command_execution_uuid}"
+        )
+
+    if len(errors) > 1:
+        raise Exception(
+            f"Multiple errors found for CommandExecutionUUID: {command_execution_uuid}"
+        )
+    return errors.pop()
+
+
+def get_continuation(err: ErrorEntry, continuation_uuid: str):
+    """Retrieve the continuation option for a given error entry and continuation identifier."""
+    continuation = err.get_continuation_options(
+        lambda o: o.identifier == ContinuationOption
+    )
+    if len(continuation) == 0:
+        raise UnknownContinuationOption(
+            description=f"No continuation option found for identifier: {continuation_uuid}"
+        )
+    elif len(continuation) > 1:
+        raise Exception(
+            f"Multiple continuation options found for identifier: {continuation_uuid}"
+        )
+    return continuation.pop()
 
 
 class ErrorRecoveryService(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.default_timeout = 3600
-        self.error_recovery_manager = ErrorRecoveryManager.get_global_instance()
-        self.error_recovery_manager.register_get_timeout_callback(
-            lambda: self.default_timeout
-        )
+        self.manager = ErrorRecoveryManager.get_global_instance()
+        self.manager.register_get_timeout_callback(lambda: self.default_timeout)
 
     @sila.UnobservableCommand(
         name="Execute Continuation Option", errors=[InvalidCommandExecutionUUID]
@@ -30,14 +68,11 @@ class ErrorRecoveryService(Base):
         ContinuationOption: str,
         InputData: str,
     ) -> None:
-        my_error = self.error_recovery_manager.get_errors(
-            lambda e: e.command_execution_uuid == CommandExecutionUUID
-        )[0]
+        # Get error and continuation option details
+        my_error = get_errors(CommandExecutionUUID)
+        continuation = get_continuation(my_error, ContinuationOption)
 
-        continuation = my_error.get_continuation_options(
-            lambda o: o.identifier == ContinuationOption
-        )[0]
-
+        # Post the continuation with the provided input data
         my_error.post_resolution(Resolution(InputData), continuation)
 
     @sila.UnobservableCommand(
@@ -47,9 +82,11 @@ class ErrorRecoveryService(Base):
         self,
         CommandExecutionUUID: str,
     ) -> None:
-        self.error_recovery_manager.clear_errors(
-            lambda e: e.command_execution_uuid == CommandExecutionUUID
-        )
+        # Get the error details
+        my_error = get_errors(CommandExecutionUUID)
+
+        # Post a cancellation resolution
+        my_error.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
 
     @sila.UnobservableCommand(name="Set Error Handling Timeout", errors=[])
     async def SetErrorHandlingTimeout(
@@ -60,7 +97,7 @@ class ErrorRecoveryService(Base):
 
     @sila.ObservableProperty(name="Recoverable Errors")
     async def RecoverableErrors(self) -> AsyncGenerator[list[RecoverableError], None]:
-        manager = self.error_recovery_manager.get_global_instance()
+        manager = self.manager.get_global_instance()
 
         # Subscribe to changes in error states
         with manager.subscribe_to_changes() as listener:
