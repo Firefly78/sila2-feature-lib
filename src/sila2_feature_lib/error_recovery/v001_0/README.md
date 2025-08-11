@@ -86,6 +86,7 @@ class TestController(sila.Feature):
         err.cancel()
 
     # One can also use it without the decorator
+    @sila.ObservableCommand()
     async def test_comment2(self, *, status: sila.Status):
         async with context_error_recovery(status) as error_recovery:
             error_recovery.wait_for_continuation(...)
