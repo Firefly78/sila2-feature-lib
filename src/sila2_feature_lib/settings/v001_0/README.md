@@ -15,7 +15,7 @@ app = Connector({...})
 
 # Create feature with our settings stored on-drive
 my_store = OnDriveStore(
-    url=".my_settings.json", serialize=yaml.dump, deserialize=yaml.unsafe_load
+    url=".my_settings.yaml", serialize=yaml.dump, deserialize=yaml.unsafe_load
 )
 settings = SettingsService(store=my_store)
 

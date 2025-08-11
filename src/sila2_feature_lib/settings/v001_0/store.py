@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass, field
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Any, Callable, List, Literal, Union
+from typing import Any, Callable, List, Literal, Type, TypeVar, Union
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,8 @@ __all__ = [
     "DataStore",
     "OnDriveStore",
 ]
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -49,7 +51,7 @@ class DataStore:
     def read_all(self):
         return self._content.copy()
 
-    def read(self, key: str):
+    def read(self, key: str, type_: Union[Type[T], None] = None) -> T:
         def _read(_key: str, settings: dict):
             if self.key_separator not in _key:
                 return settings[_key]
@@ -57,7 +59,14 @@ class DataStore:
                 _key, next = _key.split(self.key_separator, maxsplit=1)
                 return _read(next, settings[_key])
 
-        return _read(key, self._content)
+        data = _read(key, self._content)
+
+        if type_ is not None:
+            if not isinstance(data, type_):
+                raise TypeError(
+                    f"Expected type {type_.__name__}, got {type(data).__name__}"
+                )
+        return data
 
     def register(self, key: str, value: Any):
         def _register(
@@ -150,7 +159,9 @@ class OnDriveStore(DataStore):
         with open(self.url, "r") as f:
             data = self.deserialize(f)
 
-        if not isinstance(data, dict):
+        if data is None:
+            data = {}
+        elif not isinstance(data, dict):
             raise TypeError("Root object must be a dictionary", {self.url})
 
         return data
