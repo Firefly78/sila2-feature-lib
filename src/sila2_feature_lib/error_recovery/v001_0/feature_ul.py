@@ -73,7 +73,7 @@ class ErrorRecoveryService(Base):
         continuation = get_continuation(my_error, ContinuationOption)
 
         # Post the continuation with the provided input data
-        my_error.post_resolution(Resolution(InputData), continuation)
+        my_error.post_resolution(continuation, Resolution(InputData))
 
     @sila.UnobservableCommand(
         name="Abort Error Handling", errors=[InvalidCommandExecutionUUID]
@@ -86,7 +86,7 @@ class ErrorRecoveryService(Base):
         my_error = get_errors(CommandExecutionUUID)
 
         # Post a cancellation resolution
-        my_error.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
+        my_error.post_resolution(CONTINUATION_CANCELLED)
 
     @sila.UnobservableCommand(name="Set Error Handling Timeout", errors=[])
     async def SetErrorHandlingTimeout(

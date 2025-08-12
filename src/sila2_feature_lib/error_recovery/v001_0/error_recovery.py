@@ -509,7 +509,7 @@ class ErrorEntry:
                 datetime.now(timezone.utc) - self.error_time
             ).total_seconds()
             if elapsed_time > self.automation_selection_timeout:
-                self.post_resolution(Resolution.empty(), self.default_option)
+                self.post_resolution(self.default_option)
 
         return self.resolution_available.is_set()
 
@@ -541,18 +541,22 @@ class ErrorEntry:
         self._is_resolved = True
 
         if not self.is_resolution_available():
-            self.post_resolution(Resolution.empty(), CONTINUATION_CANCELLED)
+            self.post_resolution(CONTINUATION_CANCELLED)
             self.resolution_available.set()
 
         self.clear()
 
-    def post_resolution(self, resolution: Resolution, continuation: Continuation):
+    def post_resolution(
+        self,
+        continuation: Continuation,
+        resolution: Optional[Resolution] = None,
+    ):
         """
         Post a resolution for this error entry with the selected continuation.
 
         Args:
-            resolution: Resolution object
-            continuation: Selected continuation option
+            continuation (Continuation): Selected continuation option
+            resolution (Resolution | None): Resolution object or None for no input data
 
         Raises:
             ValueError: If the continuation is not in the available options
@@ -566,7 +570,7 @@ class ErrorEntry:
             )
 
         self.selected_continuation = continuation
-        self.resolution = resolution
+        self.resolution = resolution or Resolution.empty()
 
         self.resolution_available.set()
 

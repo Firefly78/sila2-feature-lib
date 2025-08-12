@@ -29,7 +29,6 @@ from sila2_feature_lib.error_recovery.v001_0.error_recovery import (
     Continuation,
     ContinuationActionHint,
     ErrorRecovery,
-    Resolution,
 )
 
 opt1 = Continuation(description="Bail!", auto_raise=True)
@@ -79,7 +78,7 @@ class TestController(sila.Feature):
 
         # We can programmatically resolve the error with a continuation option
         if not err.is_resolution_available():
-            err.post_resolution(Resolution.empty(), opt2)
+            err.post_resolution(opt2)
 
         # Finally, we cancel the error
         # This is done automatically at the end of the command execution
