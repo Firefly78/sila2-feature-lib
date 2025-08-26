@@ -39,7 +39,7 @@ def get_errors(command_execution_uuid: str):
 def get_continuation(err: ErrorEntry, continuation_uuid: str):
     """Retrieve the continuation option for a given error entry and continuation identifier."""
     continuation = err.get_continuation_options(
-        lambda o: o.identifier == ContinuationOption
+        lambda o: o.identifier == continuation_uuid
     )
     if len(continuation) == 0:
         raise UnknownContinuationOption(
