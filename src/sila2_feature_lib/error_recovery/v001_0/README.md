@@ -22,7 +22,7 @@ await app.start()
 await app.wait_for_termination()
 ```
 
-## Integrate Observable SiLA Commands
+## Integrate Observable SiLA Commands with Error Handling
 
 ```python
 from sila2_feature_lib.error_recovery.v001_0.error_recovery import (
@@ -31,7 +31,7 @@ from sila2_feature_lib.error_recovery.v001_0.error_recovery import (
     ErrorRecovery,
 )
 
-opt1 = Continuation(description="Bail!", auto_raise=True)
+opt1 = Continuation(description="Bail!")
 opt2 = Continuation(description="Try this", required_input_data="<xml>...</xml>")
 opt3 = Continuation(description="Try again", config=ContinuationActionHint.Retry)
 
@@ -55,9 +55,12 @@ class TestController(sila.Feature):
         status: sila.Status,
     ):
         # Single-line - post error, function returns the selected continuation once selected
-        _ = await error_recovery.wait_for_continuation(Exception("Test 1"), **CONFIG)
+        c = await error_recovery.wait_for_continuation(Exception("Test 1"), **CONFIG)
         # ... Process the continuation
-        error_recovery.get_error().mark_resolved()  # Then resolve the error
+        if c == opt1:
+            print("User selected option 1")
+        else:
+            print("something else")
 
         # Interactive error handling - return an error object for further interaction
         err = error_recovery.push_error(Exception("Test 2"), **CONFIG)
@@ -65,9 +68,9 @@ class TestController(sila.Feature):
         c = await err.wait_for_continuation(1800)
         if c == opt1:
             print("User selected option 1")
-            err.mark_resolved()  # Signal user that we handled the error
+            err.mark_resolved()  # Signal that error has been handled
         # handle option 2, 3, ...
-        else:
+        elif c is None:
             print("The wait_for_continuation timed out")
 
         # Check if resolution is available
