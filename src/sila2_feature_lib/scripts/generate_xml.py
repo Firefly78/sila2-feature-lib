@@ -3,11 +3,17 @@ import inspect
 from importlib import import_module
 from pathlib import Path
 
-from sila import fdl_parser
-from unitelabs.cdk import Connector, sila
+from sila.framework.fdl.serializer import Serializer
+from unitelabs.cdk import sila
 
 
-def generate_xml():
+def xml_from_feature(feature: sila.Feature):
+    ser = Serializer()
+    feature.serialize(ser)
+    return ser.result()
+
+
+def generate_xml_from_features():
     path = Path("./src/sila2_feature_lib")
     for p in path.glob("*/*/feature_ul.py"):
         print(f"Processing {p}...")
@@ -20,12 +26,8 @@ def generate_xml():
             if inspect.isclass(item) and issubclass(item, sila.Feature):
                 print(f"Serializing feature: {k}")
                 try:
-                    app = Connector()
-                    feat = item()
-                    app.register(feat)
-                    xml = fdl_parser.serialize_feature(
-                        app.sila_server.features[feat.fully_qualified_identifier]
-                    )
+                    xml = xml_from_feature(item())
+
                     # Write to file "../<feature_name>.sila.xml"
                     (p / Path(f"../{p.parts[2]}.sila.xml")).write_text(xml)
                 except Exception as e:
@@ -33,4 +35,4 @@ def generate_xml():
 
 
 if __name__ == "__main__":
-    generate_xml()
+    generate_xml_from_features()

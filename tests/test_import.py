@@ -14,6 +14,13 @@ class TestImport(unittest.TestCase):
 
         _ = DataStoreService
 
+    def test_errorrecovery(self):
+        from sila2_feature_lib.error_recovery.v001_0.feature_ul import (
+            ErrorRecoveryService,
+        )
+
+        _ = ErrorRecoveryService
+
     def test_labwaremanipulator(self):
         from sila2_feature_lib.labwaremanipulator.v001_0.feature_ul import (
             LabwareTransferManipulatorControllerBase,
