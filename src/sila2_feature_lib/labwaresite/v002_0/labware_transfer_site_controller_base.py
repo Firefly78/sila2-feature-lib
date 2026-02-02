@@ -116,7 +116,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         ]
     ]:
         """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
-        return []  # Default (not used)
 
     #
     # Transfer execution related
@@ -140,9 +139,10 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
-    ) -> None:
+    ) -> bool:
         """
-        Put the device into a state in which it is ready to accept new labware at the specified handover position.
+        Asks, if the device is ready to deliver labware at the specified handover position.
+        This command is used to check if the device is ready to deliver labware at the specified handover position.
 
         .. parameter:: HandoverPositionID
             A unique identifier of the handover position where the labware will be received. 
@@ -152,6 +152,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: LabwareID
             The unique identifier of the labware to ensure proper handling.
+        .. return:
+            Returns True if the device is ready to deliver labware at the specified handover position, otherwise False.
         """
 
     @abc.abstractmethod
@@ -188,6 +190,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: LabwareID
             The unique identifier of the labware to ensure proper handling.
+        .. returns:
+            TransactionToken: A token that can be used to track the transaction of the labware retrieval.
         """
 
     @abc.abstractmethod
@@ -230,7 +234,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
-    ) -> None:
+    ) -> bool:
         """
         Asks, if the device is ready to release labware at the specified handover position.
         This command is used to check if the device is ready to release labware at the specified handover position.
@@ -243,6 +247,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: LabwareID
             The unique identifier of the labware to ensure proper handling.
+        .. return:
+            Returns True if the device is ready to deliver labware, otherwise False.
         """
 
     @abc.abstractmethod
@@ -279,6 +285,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: LabwareID
             The unique identifier of the labware to ensure proper handling.
+        .. returns:
+            TransactionToken: A token that can be used to track the transaction of the labware delivery.
         """
 
     @abc.abstractmethod
