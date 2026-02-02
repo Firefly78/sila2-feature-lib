@@ -99,7 +99,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         )
 
     @abc.abstractmethod
-    @sila.UnObservableCommand(
+    @sila.ObservableCommand(
         name="Ready For Retrieval",
         errors=[
             CommandSequenceInvalidError,
@@ -154,7 +154,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         LabwareID: str,
         *,
         status: sila.Status,
-    ) -> str : 
+    ) -> str:
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
 
@@ -178,7 +178,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         name="Retrieve Labware",
         errors=[
             CommandSequenceInvalidError,
-            LabwareRetrievalFailed  # Uncomment or define if needed
+            LabwareRetrievalFailed
         ],
     )
     async def RetrieveLabware(
@@ -188,12 +188,12 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         *,
         status: sila.Status,
         TransactionToken: str = None,  # Transaction token for tracking the retrieval
-    ) -> None :
+    ) -> None:
         """
         Retrieves labware from the specified handover position.
 
         """
-    # labware delivery - do simiar to retrieval
+    # labware delivery - do similar to retrieval
 
     @abc.abstractmethod
     @sila.ObservableCommand(
@@ -265,6 +265,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
 
         .. parameter:: LabwareID
             The unique identifier of the labware to ensure proper handling.
+        .. returns:
+            TransactionToken: A token that can be used to track the transaction of the labware delivery.
         """
 
     # Deliver labware
@@ -299,6 +301,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         """
 
 
+    @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Internal Positions")
     async def InternalPositions(
         self,
@@ -312,8 +315,8 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             "labwareTypeID": str | None
         }
         """
-        return 1  # Default (not used)
 
+    @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Available Intermediate Actions")
     async def AvailableIntermediateActions(
         self,
@@ -326,7 +329,6 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         ]
     ]:
         """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
-        return []  # Default (not used)
 
 
     
