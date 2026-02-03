@@ -122,17 +122,13 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         Asks, if the device is ready to deliver labware at the specified handover position.
         This command is used to check if the device is ready to deliver labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be received.
+            InternalPositionID: The unique identifier of the internal position where the labware will be stored.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. return:
-            Returns True if the device is ready to deliver labware at the specified handover position, otherwise False.
-
+        Returns:
+            True if the device is ready to deliver labware at the specified handover position, otherwise False.
         """
 
     @abc.abstractmethod
@@ -158,18 +154,13 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be received.
+            InternalPositionID: A unique identifier of the internal position where the labware will be stored.
+            LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. returns: 
+        Returns:
             TransactionToken: A token that can be used to track the transaction of the labware retrieval.
         """
 
@@ -192,6 +183,10 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         """
         Retrieves labware from the specified handover position.
 
+        Args:
+            IntermediateActions: Optional list of intermediate actions to execute during retrieval.
+            LabwareID: UUID of the labware item to ensure proper handling.
+            TransactionToken: Transaction token for tracking the retrieval.
         """
     # labware delivery - do similar to retrieval
 
@@ -219,16 +214,13 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         Asks, if the device is ready to release labware at the specified handover position.
         This command is used to check if the device is ready to release labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be handed over.
+            InternalPositionID: The unique identifier of the internal position where the labware will be stored.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. returns:
-            bool: True if the device is ready to deliver labware, False otherwise.
+        Returns:
+            True if the device is ready to deliver labware, False otherwise.
         """
     
     @abc.abstractmethod
@@ -254,18 +246,13 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         """
         Prepares the device into a state in which it is ready to release labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be handed over.
+            InternalPositionID: A unique identifier of the internal position where the labware will be stored.
+            LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. returns:
+        Returns:
             TransactionToken: A token that can be used to track the transaction of the labware delivery.
         """
 
@@ -289,6 +276,11 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     ) -> None:
         """
         Delivers labware to the specified handover position.
+
+        Args:
+            IntermediateActions: Optional list of intermediate actions to execute during delivery.
+            LabwareID: UUID of the labware item to ensure proper handling.
+            TransactionToken: Transaction token for tracking the delivery.
         """
         pass
 
@@ -296,8 +288,11 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="All Available Handover Positions")
     async def AllHandoverPositions(self) -> list[str]:
-        """All handover positions of the device including the number of sub-positions.
-        ... returns: A list of all handover position IDs.
+        """
+        All handover positions of the device including the number of sub-positions.
+
+        Returns:
+            A list of all handover position IDs.
         """
 
 
@@ -306,14 +301,17 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     async def InternalPositions(
         self,
     ) -> list[str]: # better naming 
-        """The number of addressable internal positions of the device.
-        complex type:
-        {
-            "InternalPositionID": str,
-            "occupied": bool
-            "labwareID": str | None
-            "labwareTypeID": str | None
-        }
+        """
+        The number of addressable internal positions of the device.
+
+        Returns:
+            Complex type:
+            {
+                "InternalPositionID": str,
+                "occupied": bool
+                "labwareID": str | None
+                "labwareTypeID": str | None
+            }
         """
 
     @abc.abstractmethod
@@ -328,7 +326,12 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             ),
         ]
     ]:
-        """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
+        """
+        Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution.
+
+        Returns:
+            List of fully qualified command identifiers.
+        """
 
 
     

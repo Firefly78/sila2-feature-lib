@@ -96,12 +96,22 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Available Handover Positions")
     async def HandoverPositions(self) -> list[str]:
-        """All handover positions of the device including the number of sub-positions."""
+        """
+        All handover positions of the device including the number of sub-positions.
+
+        Returns:
+            A list of all handover position IDs.
+        """
 
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Available Internal Positions")
     async def InternalPositions(self) -> list[str]:
-        """The number of addressable internal positions of the device."""
+        """
+        The number of addressable internal positions of the device.
+
+        Returns:
+            A list of internal position IDs.
+        """
 
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Available Intermediate Actions")
@@ -115,7 +125,12 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             ),
         ]
     ]:
-        """Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution."""
+        """
+        Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution.
+
+        Returns:
+            List of fully qualified command identifiers.
+        """
 
     #
     # Transfer execution related
@@ -144,16 +159,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         Asks, if the device is ready to deliver labware at the specified handover position.
         This command is used to check if the device is ready to deliver labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be received.
+            InternalPositionID: The unique identifier of the internal position where the labware will be stored.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. return:
-            Returns True if the device is ready to deliver labware at the specified handover position, otherwise False.
+        Returns:
+            True if the device is ready to deliver labware at the specified handover position, otherwise False.
         """
 
     @abc.abstractmethod
@@ -179,18 +191,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be received.
+            InternalPositionID: A unique identifier of the internal position where the labware will be stored.
+            LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. returns:
+        Returns:
             TransactionToken: A token that can be used to track the transaction of the labware retrieval.
         """
 
@@ -212,7 +219,12 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare For Input" command).
+        Notifies the passive destination device of a labware item that has been transferred to it.
+        Sent after a "Prepare For Input" command.
+
+        Args:
+            IntermediateActions: Optional list of intermediate actions to execute.
+            LabwareID: UUID of the labware item to ensure proper handling.
         """
 
     @abc.abstractmethod
@@ -239,16 +251,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         Asks, if the device is ready to release labware at the specified handover position.
         This command is used to check if the device is ready to release labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be handed over.
+            InternalPositionID: The unique identifier of the internal position where the labware will be stored.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            The unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. return:
-            Returns True if the device is ready to deliver labware, otherwise False.
+        Returns:
+            True if the device is ready to deliver labware, otherwise False.
         """
 
     @abc.abstractmethod
@@ -274,18 +283,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
         Prepares the device into a state in which it is ready to release labware at the specified handover position.
 
-        .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be handed over.
+        Args:
+            HandoverPositionID: A unique identifier of the handover position where the labware will be handed over.
+            InternalPositionID: A unique identifier of the internal position where the labware will be stored.
+            LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
+            LabwareID: The unique identifier of the labware to ensure proper handling.
 
-        .. parameter:: InternalPositionID
-            A unique identifier of the internal position where the labware will be stored.
-
-        .. parameter:: LabwareTypeID
-            The unique identifier of the labware type to ensure proper handling.
-
-        .. parameter:: LabwareID
-            The unique identifier of the labware to ensure proper handling.
-        .. returns:
+        Returns:
             TransactionToken: A token that can be used to track the transaction of the labware delivery.
         """
 
@@ -305,7 +309,12 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For Output" command).
+        Notifies the passive source device of a labware item that has been removed from it.
+        Sent after a "Prepare For Output" command.
+
+        Args:
+            IntermediateActions: Optional list of intermediate actions to execute.
+            LabwareID: UUID of the labware item to ensure proper handling.
         """
 
    
