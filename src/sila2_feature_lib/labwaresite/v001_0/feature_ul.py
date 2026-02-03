@@ -4,7 +4,12 @@ from abc import ABCMeta, abstractmethod
 
 from unitelabs.cdk import sila
 
-from .types.sila_types import HandoverPosition, InvalidCommandSequence, PositionIndex
+from ...labwaremanipulator.v001_0.types.sila_types import (
+    HandoverPosition,
+    InvalidCommandSequence,
+    PositionIndex,
+)
+
 
 logger = logging.getLogger(__name__)
 

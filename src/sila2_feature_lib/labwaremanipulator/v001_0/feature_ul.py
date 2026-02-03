@@ -9,7 +9,7 @@ from .types.sila_types import HandoverPosition, InvalidCommandSequence, Position
 logger = logging.getLogger(__name__)
 
 
-class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
+class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=ABCMeta):
     """
     This feature (together with the "Labware Transfer Manipulator Controller" feature) provides commands to trigger the
     sub-tasks of handing over a labware item, e.g. a microtiter plate or a tube, from one device to another in a
@@ -139,7 +139,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=ABCMeta):
         .. parameter:: Indicates the position the labware has been removed from.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     @sila.UnobservableProperty(name="Available Handover Positions")
     async def AvailableHandoverPositions(self) -> list[HandoverPosition]:
         """All handover positions of the device including the number of sub-positions."""

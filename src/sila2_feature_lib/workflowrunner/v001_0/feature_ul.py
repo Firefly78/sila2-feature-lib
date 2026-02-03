@@ -87,12 +87,13 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name="Task Status",
             errors=[TaskError],
         )
-        @sila.Response("Status", "Status of a task")
         async def get_task_status(self, identifier: str) -> str:
             """
             Get the status of the running task
 
             .. identifier:: Task identifier
+
+            .. return:: Status of the task
             """
             pass
 
@@ -101,7 +102,6 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name="Start New Task",
             errors=[TaskError],
         )
-        @sila.Response("Identifier", "Identifier of the started workflow process")
         async def start_new_task(
             self,
             name: typing.Annotated[str, wf_name_annotation],
@@ -112,6 +112,8 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
 
             .. name:: Name of the workflow
             .. arguments_json:: JSON encoded arguments for the workflow
+
+            .. return:: Identifier of the started workflow process
             """
             pass
 

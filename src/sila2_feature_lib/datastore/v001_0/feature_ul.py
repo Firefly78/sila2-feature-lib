@@ -89,8 +89,13 @@ class DataStoreService(sila.Feature, Generic[T]):
         identifier="TestConnection",
         name="Test Connection",
     )
-    @sila.Response("Status", "Status of the connection")
     async def test_connection(self) -> str:
+        """
+        Test Connection
+
+        Returns:
+            Status: "OK" if the connection is successful
+        """
         # Just open the connection and the close it
         with DataStoreService[ConnectionHandleBase].get_handle() as conn:
             await conn.test()  # Raise on error
