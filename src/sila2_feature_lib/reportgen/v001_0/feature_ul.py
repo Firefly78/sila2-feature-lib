@@ -42,7 +42,6 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
         name="Generate Report",
         errors=[InternalError, InvalidParameterError, ReportGenerationError],
     )
-    @sila.Response("Report ID")
     async def generate_report(
         self,
         identifier: str,

@@ -12,33 +12,36 @@ logger = logging.getLogger(__name__)
 class ErrorRecoveryServiceBase(sila.Feature, metaclass=ABCMeta):
     """
     This feature enables SiLA error handling during the execution of observable commands.
-    A client can subscribe to the property "Recoverable Errors" which contains a list of recoverable errors that occurred and are not
-    handled yet.
+    A client can subscribe to the property "Recoverable Errors" which contains a list of recoverable errors that \
+    occurred and are not handled yet.
 
-    If a recoverable error occurs during the execution of an observable command, a respective "Recoverable Error" item will be added to the
-    list of the "Recoverable Errors" property. Each error item contains the error description, the command execution UUID of the observable
-    command execution during which the error occurred, the time when the error occurred and a list of possible continuation options.
-    To handle the error, the client sends one of the provided continuation options together with the command execution UUID, using the
-    command "Execute Continuation Option".
+    If a recoverable error occurs during the execution of an observable command, a respective "Recoverable Error" \
+    item will be added to the list of the "Recoverable Errors" property. Each error item contains the error \
+    description, the command execution UUID of the observable command execution during which the error occurred, \
+    the time when the error occurred and a list of possible continuation options.
+    To handle the error, the client sends one of the provided continuation options together with the command \
+    execution UUID, using the command "Execute Continuation Option".
 
-    Within a continuation option the server can specify additional input data that has to be sent by the client in order to execute that
-    continuation option, e.g. an adjusted parameter value. The structure of the required data has to be described in the "Required Input Data"
-    field of the respective continuation option. The data must be contained in the "Input Data" field of the "Execute Continuation Option"
-    command.
-    When the server receives the continuation option the according error item will be removed from the list of the "Recoverable Errors" property.
+    Within a continuation option the server can specify additional input data that has to be sent by the client in \
+    order to execute that continuation option, e.g. an adjusted parameter value. The structure of the required data \
+    has to be described in the "Required Input Data" field of the respective continuation option. The data must be \
+    contained in the "Input Data" field of the "Execute Continuation Option" command.
+    When the server receives the continuation option the according error item will be removed from the list of the \
+    "Recoverable Errors" property.
 
-    Instead of sending a continuation option the client alternatively can use the "Abort Error Handling" command (containing the command
-    execution UUID) to stop the handling of the respective error. The server will treat this error as a 'normal' (unrecoverable) error
-    using the standard error mechanism of SiLA.
+    Instead of sending a continuation option the client alternatively can use the "Abort Error Handling" command \
+    (containing the command execution UUID) to stop the handling of the respective error. The server will treat \
+    this error as a 'normal' (unrecoverable) error using the standard error mechanism of SiLA.
 
-    With the command "Set Error Handling Timeout" the maximum time can be specified that the server will wait for a selected continuation
-    option before it stops the error handling by removing the current error from the list of the "Recoverable Errors" property and behaving
-    like without executed  error handling by returning a 'normal' (unrecoverable) SiLA error.
-    This can be used if an instrument must not be in a (blocked) waiting state for more than a certain time in order to keep its functionality
-    alive, because some service actions have to be regularly performed.
+    With the command "Set Error Handling Timeout" the maximum time can be specified that the server will wait for a \
+    selected continuation option before it stops the error handling by removing the current error from the list of \
+    the "Recoverable Errors" property and behaving like without executed  error handling by returning a 'normal' \
+    (unrecoverable) SiLA error.
+    This can be used if an instrument must not be in a (blocked) waiting state for more than a certain time in \
+    order to keep its functionality alive, because some service actions have to be regularly performed.
 
-    In case of multi client access it is recommended that only one client (preferably the one that issued the according command execution)
-    handles recoverable errors, e.g. by applying the "Lock Controller" feature.
+    In case of multi client access it is recommended that only one client (preferably the one that issued the \
+    according command execution) handles recoverable errors, e.g. by applying the "Lock Controller" feature.
     """
 
     @abstractmethod

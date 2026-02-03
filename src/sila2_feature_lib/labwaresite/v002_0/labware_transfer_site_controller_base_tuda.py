@@ -1,27 +1,20 @@
 import abc
-import dataclasses
 import typing
 
-from typing import Annotated, TypeAlias, Annotated, List
 from unitelabs.cdk import sila
 
 from ...errors import (
-    LabwareTypeUnknownError, 
+    CommandSequenceInvalidError,
+    DeviceStateIllegalError,
+    LabwareAttributeMalformedError,
+    LabwareAttributeMissingError,
+    LabwareTypeUnknownError,
     LabwareTypeUnsupportedError,
     NestEmptyError,
-    NestUnknownError,
     NestOccupiedError,
-    LabwareAttributeMissingError,
-    CommandSequenceInvalidError,
-    LabwareAttributeMalformedError,
-    DeviceStateIllegalError
+    NestUnknownError,
 )
-from ...structures import (
-    LabwareInformation,
-    NestIdentifier,
-    NestGroupDescription
-)
-
+from ...structures import LabwareInformation, NestGroupDescription, NestIdentifier
 
 
 class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
@@ -90,11 +83,11 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             category="manipulation",
             version="0.1",
             maturity_level="Draft",
-            identifier="LabwareTransferSiteController"
+            identifier="LabwareTransferSiteController",
         )
 
     #
-    # Management 
+    # Management
     #
 
     @abc.abstractmethod
@@ -105,14 +98,11 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    @sila.UnobservableCommand(
-        identifier="AvailableHandoverNests"
-    )
-    @sila.Response(name="AvailableHandoverNests")
+    @sila.UnobservableCommand(identifier="AvailableHandoverNests")
+    # @sila.Response(name="AvailableHandoverNests")
     async def get_available_handover_positions(
-            self,
-            internal_position: NestIdentifier
-        ) -> typing.List[NestIdentifier]:
+        self, internal_position: NestIdentifier
+    ) -> typing.List[NestIdentifier]:
         """
         Returns the available handover positions (nests) for a given internal position.
 
@@ -128,14 +118,11 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    @sila.UnobservableCommand(
-        identifier="AvailableTargetNestGroups"
-    )
-    @sila.Response(name="AvailableTargetNestGroups")
+    @sila.UnobservableCommand(identifier="AvailableTargetNestGroups")
+    # @sila.Response(name="AvailableTargetNestGroups")
     async def get_available_target_nest_groups(
-            self,
-            labware: LabwareInformation
-        ) -> typing.List[str]:
+        self, labware: LabwareInformation
+    ) -> typing.List[str]:
         """
         Returns the nest groups a specific labware type maybe transfered to.
 
@@ -159,8 +146,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             NestUnknownError,
             NestOccupiedError,
             LabwareAttributeMalformedError,
-            DeviceStateIllegalError
-        ]
+            DeviceStateIllegalError,
+        ],
     )
     async def on_prepare_for_input(
         self,
@@ -179,13 +166,10 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         .. parameter:: Specifies the state of labware that will be handed over to transfer information about the labware
                        that the device might need to handle it correctly.
         """
-    
+
     @abc.abstractmethod
     @sila.ObservableCommand(
-        name="LabwareDelivered",
-        errors=[
-            CommandSequenceInvalidError
-        ]
+        name="LabwareDelivered", errors=[CommandSequenceInvalidError]
     )
     async def on_labware_delivered(
         self,
@@ -193,9 +177,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare For Input" command).
+        Notifies the passive destination device of a labware item that has been transferred to it \
+            (sent after a "Prepare For Input" command).
         """
-
 
     @abc.abstractmethod
     @sila.ObservableCommand(
@@ -204,8 +188,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             NestUnknownError,
             NestEmptyError,
-            DeviceStateIllegalError
-        ]
+            DeviceStateIllegalError,
+        ],
     )
     async def on_prepare_for_output(
         self,
@@ -219,21 +203,15 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
         .. parameter:: Indicates the position where the labware will be handed over.
         """
-  
+
     @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="LabwareRemoved",
-        errors=[
-            CommandSequenceInvalidError
-        ]
-    )
+    @sila.ObservableCommand(name="LabwareRemoved", errors=[CommandSequenceInvalidError])
     async def on_labware_removed(
         self,
         *,
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For Output" command).
+        Notifies the passive source device of a labware item that has been removed from it \
+            (sent after a "Prepare For Output" command).
         """
-
-   

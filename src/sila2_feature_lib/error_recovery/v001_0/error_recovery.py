@@ -534,7 +534,8 @@ class ErrorEntry:
         return list(filter(predicate, self.continuation_options))
 
     def mark_resolved(self):
-        """Resolve the error and remove it from the error list. Any 'waiting for continuation' will raise a `CancellationError`."""
+        """Resolve the error and remove it from the error list. \
+            Any 'waiting for continuation' will raise a `CancellationError`."""
         if self._is_resolved:  # Prevent infinite recursion
             return
 
@@ -594,7 +595,8 @@ class ErrorEntry:
 
         Args:
             timeout: Timeout in seconds, if None uses the default timeout
-            auto_resolve: If True, automatically resolves the error when continuation is selected. If None, uses the instance's auto_resolve setting.
+            auto_resolve: If True, automatically resolves the error when continuation is \
+                selected. If None, uses the instance's auto_resolve setting.
         """
 
         if timeout is None:
