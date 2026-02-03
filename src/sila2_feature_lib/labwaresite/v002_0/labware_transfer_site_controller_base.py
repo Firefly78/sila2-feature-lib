@@ -90,7 +90,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         )
 
     #
-    # Management 
+    # Properties
     #
 
     @abc.abstractmethod
@@ -132,12 +132,13 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             List of fully qualified command identifiers.
         """
 
+
     #
-    # Transfer execution related
+    # Commands 
     #
 
     @abc.abstractmethod
-    @sila.ObservableCommand(
+    @sila.UnobservableCommand(
         name="Ready For Retrieval",
         errors=[
             CommandSequenceInvalidError,
@@ -151,8 +152,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         HandoverPositionID: str,  # UUID of the handover position
         InternalPositionID: str,  # UUID of the internal position
         LabwareID: str,  # UUID of the labware item to ensure proper handling
-        *,
-        status: sila.Status,
     ) -> bool:
         """
         Asks, if the device is ready to deliver labware at the specified handover position.
@@ -186,6 +185,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,
         *,
         status: sila.Status,
+        intermediate: sila.Intermediate[int]
     ) -> str:  # TransactionToken
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
@@ -195,6 +195,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             InternalPositionID: A unique identifier of the internal position where the labware will be stored.
             LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
             LabwareID: The unique identifier of the labware to ensure proper handling.
+
+        Yields:
+           SecondsRemaining: The estimated amount of seconds until the device is ready for the labware input.
 
         Returns:
             TransactionToken: A token that can be used to track the transaction of the labware retrieval.
@@ -216,10 +219,14 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
+        intermediate: sila.Intermediate[int]
     ) -> None:
         """
         Notifies the passive destination device of a labware item that has been transferred to it.
         Sent after a "Prepare For Input" command.
+
+        Yields:
+           SecondsRemaining: The estimated amount of seconds until the labware has been delivered.
 
         Args:
             IntermediateActions: Optional list of intermediate actions to execute.
@@ -227,7 +234,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    @sila.ObservableCommand(
+    @sila.UnobservableCommand(
         name="Ready For Delivery",
         errors=[
             CommandSequenceInvalidError,
@@ -242,8 +249,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         HandoverPositionID: str,  # UUID of the handover position
         InternalPositionID: str,  # UUID of the internal position
         LabwareID: str,  # UUID of the labware item to ensure proper handling
-        *,
-        status: sila.Status,
     ) -> bool:
         """
         Asks, if the device is ready to release labware at the specified handover position.
@@ -277,6 +282,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,
         *,
         status: sila.Status,
+        intermediate: sila.Intermediate[int]
     ) -> str:
         """
         Prepares the device into a state in which it is ready to release labware at the specified handover position.
@@ -286,6 +292,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             InternalPositionID: A unique identifier of the internal position where the labware will be stored.
             LabwareTypeID: The unique identifier of the labware type to ensure proper handling.
             LabwareID: The unique identifier of the labware to ensure proper handling.
+
+        Yields:
+           SecondsRemaining: The estimated amount of seconds until the device is ready for the labware output.
 
         Returns:
             TransactionToken: A token that can be used to track the transaction of the labware delivery.
@@ -305,6 +314,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
+        intermediate: sila.Intermediate[int]
     ) -> None:
         """
         Notifies the passive source device of a labware item that has been removed from it.
@@ -313,6 +323,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         Args:
             IntermediateActions: Optional list of intermediate actions to execute.
             LabwareID: UUID of the labware item to ensure proper handling.
+        Yields:
+            SecondsRemaining: The estimated amount of seconds until the labware has been removed.
+
         """
 
    
