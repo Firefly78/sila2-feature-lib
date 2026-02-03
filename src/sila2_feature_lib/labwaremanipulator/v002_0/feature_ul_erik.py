@@ -91,11 +91,10 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             maturity_level="draft",
             # identifier="LabwareTransferManipulatorController",
         )
-     
+
     @abc.abstractmethod
     @sila.UnobservableProperty()
     async def get_available_handover_positions(self) -> list[NestIdentifier]:
-        
         """
         Returns the available handover positions (nests) this device can service.
         """
