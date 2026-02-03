@@ -4,7 +4,7 @@ import typing
 
 from unitelabs.cdk import sila
 
-from .types.sila_types import (
+from ...labwaremanipulator.v001_0.types.sila_types import (
     HandoverPosition,
     InvalidCommandSequence,
     LabwareNotPicked,
@@ -13,6 +13,8 @@ from .types.sila_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+NestIdentifier = str
 
 
 class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMeta):

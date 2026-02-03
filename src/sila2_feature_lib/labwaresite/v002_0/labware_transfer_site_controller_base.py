@@ -4,14 +4,13 @@ import typing
 
 from unitelabs.cdk import sila
 
-
 # Import errors from manipulator's defined_execution_errors
 from .defined_execution_errors import (
+    CommandSequenceInvalidError,
     HandoverPositionUnknownError,
     InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
     LabwareDeliveryFailed,
+    LabwareIDUnknownError,
     LabwareRetrievalFailed,
     PositionOccupiedError,
 )
@@ -215,7 +214,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare For Input" command).
+        Notifies the passive destination device of a labware item that has been transferred to it \
+            (sent after a "Prepare For Input" command).
         """
 
     @abc.abstractmethod
@@ -309,5 +309,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For Output" command).
+        Notifies the passive source device of a labware item that has been removed from it \
+            (sent after a "Prepare For Output" command).
         """

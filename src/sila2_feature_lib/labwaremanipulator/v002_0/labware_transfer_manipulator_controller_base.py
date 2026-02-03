@@ -4,14 +4,13 @@ import typing
 
 from unitelabs.cdk import sila
 
-
 from .defined_execution_errors import (
+    CommandSequenceInvalidError,
     HandoverPositionUnknownError,
     InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
-    LabwareRetrievalFailed,
     LabwareDeliveryFailed,
+    LabwareIDUnknownError,
+    LabwareRetrievalFailed,
     PositionOccupiedError,
 )
 

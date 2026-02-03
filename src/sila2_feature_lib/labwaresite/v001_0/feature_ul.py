@@ -10,7 +10,6 @@ from ...labwaremanipulator.v001_0.types.sila_types import (
     PositionIndex,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
