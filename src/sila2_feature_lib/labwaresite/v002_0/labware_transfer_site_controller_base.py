@@ -146,7 +146,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             LabwareIDUnknownError
         ],
     )
-    @sila.Response(name="Ready For Retrieval")
     async def ReadyForRetrieval(
         self,
         HandoverPositionID: str,  # UUID of the handover position
@@ -238,7 +237,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             PositionOccupiedError
         ],
     )
-    @sila.Response(name="Ready For Delivery")
     async def ReadyForDelivery(
         self,
         HandoverPositionID: str,  # UUID of the handover position

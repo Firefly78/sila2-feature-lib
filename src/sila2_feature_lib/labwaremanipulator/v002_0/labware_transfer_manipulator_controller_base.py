@@ -109,7 +109,6 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             PositionOccupiedError
         ],
     )
-    @sila.Response(name="Ready For Retrieval")
     async def ReadyForRetrieval(
         self,
         HandoverPositionID: str, # UUID of the handover position
@@ -201,7 +200,6 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             PositionOccupiedError
         ],
     )
-    @sila.Response(name="Ready For Delivery")
     async def ReadyForDelivery(
         self,
         HandoverPositionID: str,  # UUID of the handover position
