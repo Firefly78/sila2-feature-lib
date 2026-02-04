@@ -83,13 +83,14 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=ABCMeta):
         """
         Put the device into a state in which it is ready to accept new labware at the specified handover position.
 
-        .. parameter:: Indicates the position where the labware will be handed over.
-        .. parameter:: Indicates the position which the labware will be stored at within the device, e.g. internal
-                       storage positions of an incubator.
-        .. parameter:: Specifies the type of labware that will be handed over to transfer information about the
-                       labware that the device might need to handle it correctly.
-        .. parameter:: Represents the unique identification of a labware in the controlling system. It is assigned
-                       by the system and must remain unchanged during the whole process.
+        Args:
+            HandoverPosition: Indicates the position where the labware will be handed over.
+            InternalPosition: Indicates the position which the labware will be stored at within the device, e.g. \
+                internal storage positions of an incubator.
+            LabwareType: Specifies the type of labware that will be handed over to transfer information about the \
+                labware that the device might need to handle it correctly.
+            LabwareUniqueID: Represents the unique identification of a labware in the controlling system. It is \
+                assigned by the system and must remain unchanged during the whole process.
         """
 
     @sila.ObservableCommand(name="Prepare For Output", errors=[InvalidCommandSequence])
@@ -103,10 +104,10 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=ABCMeta):
         """
         Put the device into a state in which it is ready to release the labware at the specified handover position.
 
-        .. parameter:: Indicates the position where the labware will be handed over.
-        .. parameter:: Indicates the position which the labware will be retrieved from within the device, e.g. internal \
-              storage positions of an incubator.
-
+        Args:
+            HandoverPosition: Indicates the position where the labware will be handed over.
+            InternalPosition: Indicates the position which the labware will be retrieved from within the device, \
+                e.g. internal storage positions of an incubator.
         """
 
     @abstractmethod
@@ -118,10 +119,11 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=ABCMeta):
         status: sila.Status,
     ):
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare \
-              For Input" command)
+        Notifies the passive destination device of a labware item that has been transferred to it \
+        (sent after a "Prepare For Input" command).
 
-        .. parameter:: Indicates the position the labware item has been delivered to.
+        Args:
+            HandoverPosition: Indicates the position the labware item has been delivered to.
         """
 
     @abstractmethod
@@ -133,10 +135,11 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=ABCMeta):
         status: sila.Status,
     ):
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For \
-              Output" command).
+        Notifies the passive source device of a labware item that has been removed from it \
+        (sent after a "Prepare For Output" command).
 
-        .. parameter:: Indicates the position the labware has been removed from.
+        Args:
+            HandoverPosition: Indicates the position the labware has been removed from.
         """
 
     @abstractmethod

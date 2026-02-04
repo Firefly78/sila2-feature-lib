@@ -57,15 +57,15 @@ class ErrorRecoveryServiceBase(sila.Feature, metaclass=ABCMeta):
         """
         Executes the selected option to recover the error.
 
-        .. parameter:: The UUID of the observable command execution for which the error shall be
-        handled.
-        .. parameter:: The identifier of the continuation option to be executed. It must match the
-        identifier of one of the continuation options specified in the 'ContinuationOptions' list of
-        the according 'RecoverableError' object.
-        .. parameter:: If required this parameter contains the data that has to be sent along with a
-        continuation option in order to execute the requested recovery option. The kind of the data
-        as well as the required format must be described in the 'RequiredInputData' field of the
-        respective continuation option.
+        Args:
+            CommandExecutionUUID: The UUID of the observable command execution for which the error shall be handled.
+            ContinuationOption: The identifier of the continuation option to be executed. It must match the \
+                identifier of one of the continuation options specified in the 'ContinuationOptions' list of \
+                the according 'RecoverableError' object.
+            InputData: If required this parameter contains the data that has to be sent along with a \
+                continuation option in order to execute the requested recovery option. The kind of the data \
+                as well as the required format must be described in the 'RequiredInputData' field of the \
+                respective continuation option.
         """
         raise NotImplementedError
 
@@ -80,8 +80,9 @@ class ErrorRecoveryServiceBase(sila.Feature, metaclass=ABCMeta):
         """
         Stops the handling of the error. The server will treat this error as a not recovered error.
 
-        .. parameter:: The UUID of the observable command execution for which the error handling
-        shall be aborted.
+        Args:
+            CommandExecutionUUID: The UUID of the observable command execution for which the error handling \
+                shall be aborted.
         """
         raise NotImplementedError
 
@@ -92,12 +93,13 @@ class ErrorRecoveryServiceBase(sila.Feature, metaclass=ABCMeta):
         ErrorHandlingTimeout: Timeout,
     ) -> None:
         """
-        Sets the maximum time that the server will wait for a selected continuation option in case
-        of a recoverable error. If no continuation option is selected within the specified time the
-        failed request will be answered with an unrecoverable error. A value of zero specifies an
+        Sets the maximum time that the server will wait for a selected continuation option in case \
+        of a recoverable error. If no continuation option is selected within the specified time the \
+        failed request will be answered with an unrecoverable error. A value of zero specifies an \
         indefinite time, meaning that the server will wait till a continuation options is sent.
 
-        .. parameter:: The timeout in seconds.
+        Args:
+            ErrorHandlingTimeout: The timeout in seconds.
         """
         raise NotImplementedError
 
@@ -107,7 +109,7 @@ class ErrorRecoveryServiceBase(sila.Feature, metaclass=ABCMeta):
         self,
     ) -> AsyncGenerator[list[RecoverableError], None]:
         """
-        A list of all recoverable errors that occurred during execution and have not been handled
+        A list of all recoverable errors that occurred during execution and have not been handled \
         yet.
         """
 
