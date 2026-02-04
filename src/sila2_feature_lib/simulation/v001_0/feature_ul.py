@@ -79,7 +79,7 @@ class SimulatorController(sila.Feature):
         )
         super().__init__(
             identifier="SimulationController",
-            display_name="Simulation Controller",
+            name="Simulation Controller",
             description="""This Feature provides control over the simulation behaviour of a SiLA Server.
 
     A SiLA Server can run in two modes:

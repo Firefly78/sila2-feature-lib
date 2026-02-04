@@ -49,14 +49,14 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             self,
             *args,
             identifier: str = "WorkflowRunnerService",
-            display_name: str = "Workflow Runner Service",
+            name: str = "Workflow Runner Service",
             description: str = "Feature for starting/monitoring long running tasks",
             **kwargs,
         ):
             super().__init__(
                 *args,
                 identifier=identifier,
-                display_name=display_name,
+                name=name,
                 description=description,
                 **kwargs,
             )

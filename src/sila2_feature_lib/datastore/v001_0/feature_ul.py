@@ -53,7 +53,7 @@ class DataStoreService(sila.Feature, Generic[T]):
     def __init__(
         self,
         identifier="DataStoreService",
-        display_name="Data Store Service",
+        name="Data Store Service",
         description="Feature for accessing shared resources",
         version=VERSION,
         handle: Union[str, T] = None,
@@ -61,7 +61,7 @@ class DataStoreService(sila.Feature, Generic[T]):
     ):
         super().__init__(
             identifier=identifier,
-            display_name=display_name,
+            name=name,
             description=description,
             version=version,
             **kwargs,

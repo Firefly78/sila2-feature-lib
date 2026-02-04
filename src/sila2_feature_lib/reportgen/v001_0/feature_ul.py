@@ -25,14 +25,14 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
         self,
         *args,
         identifier="ReportGenController",
-        display_name="Report Generator Controller",
+        name="Report Generator Controller",
         description="Report generation SiLA feature",
         **kwargs,
     ):
         super().__init__(
             *args,
             identifier=identifier,
-            display_name=display_name,
+            name=name,
             description=description,
             **kwargs,
         )
