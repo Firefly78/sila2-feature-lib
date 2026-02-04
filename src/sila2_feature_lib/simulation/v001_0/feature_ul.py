@@ -80,15 +80,13 @@ class SimulatorController(sila.Feature):
         super().__init__(
             identifier="SimulationController",
             name="Simulation Controller",
-            description="""This Feature provides control over the simulation behaviour of a SiLA Server.
-
-    A SiLA Server can run in two modes:
-    (a) Real Mode - with real activities, e.g. addressing or controlling real hardware, e.g. through serial/CANBus commands,
-        writing to real databases, moving real objects etc.
-    (b) Simulation Mode - where every command is only simulated and responses are just example returns.
-
-    Note that certain commands and properties might not be affected by this feature if they
-    do not interact with the real world.""",
+            description="This Feature provides control over the simulation behaviour of a SiLA Server. \
+A SiLA Server can run in two modes: \
+(a) Real Mode - with real activities, e.g. addressing or controlling real hardware, e.g. through serial/CANBus commands, \
+writing to real databases, moving real objects etc. \
+(b) Simulation Mode - where every command is only simulated and responses are just example returns. \
+Note that certain commands and properties might not be affected by this feature if they \
+do not interact with the real world.",
         )
 
     @sila.UnobservableCommand(
