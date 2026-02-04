@@ -1,45 +1,43 @@
 # SiLA defined execution errors
 
-from unitelabs.cdk import sila
 
-
-class CommandSequenceInvalidError(sila.DefinedExecutionError):
+class CommandSequenceInvalidError(Exception):
     """
     Raised when the command sequence is invalid, such as when a command is called out of order.
     """
 
 
-class HandoverPositionUnknownError(sila.DefinedExecutionError):
+class HandoverPositionUnknownError(Exception):
     """
     Raised when the UUID of a handover position is unknown.
     """
 
 
-class InternalPositionUnknownError(sila.DefinedExecutionError):
+class InternalPositionUnknownError(Exception):
     """
     Raised when the UUID of an internal position is unknown.
     """
 
 
-class LabwareIDUnknownError(sila.DefinedExecutionError):
+class LabwareIDUnknownError(Exception):
     """
     Raised when the UUID of a labware item is unknown.
     """
 
 
-class LabwareRetrievalFailed(sila.DefinedExecutionError):
+class LabwareRetrievalFailed(Exception):
     """
     Raised when retrieving a labware item from the source device fails.
     """
 
 
-class LabwareDeliveryFailed(sila.DefinedExecutionError):
+class LabwareDeliveryFailed(Exception):
     """
     Raised when delivering a labware item to the destination device fails.
     """
 
 
-class NestOccupiedError(sila.DefinedExecutionError):
+class NestOccupiedError(Exception):
     """
     Raised when attempting to place labware in an already occupied nest.
     """

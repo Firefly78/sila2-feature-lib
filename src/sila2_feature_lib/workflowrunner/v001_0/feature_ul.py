@@ -9,7 +9,7 @@ from unitelabs.cdk import sila
 logger = logging.getLogger(__name__)
 
 
-class TaskError(sila.DefinedExecutionError):
+class TaskError(Exception):
     """Error during workflow"""
 
 
