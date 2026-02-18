@@ -8,15 +8,15 @@ except ImportError as ex:
     ) from ex
 
 
-class InvalidParameterError(sila.DefinedExecutionError):
+class InvalidParameterError(Exception):
     """The given parameter is invalid."""
 
 
-class ReportGenerationError(sila.DefinedExecutionError):
+class ReportGenerationError(Exception):
     """An error occurred during report generation."""
 
 
-class InternalError(sila.DefinedExecutionError):
+class InternalError(Exception):
     """An internal error occurred."""
 
 
@@ -25,14 +25,14 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
         self,
         *args,
         identifier="ReportGenController",
-        display_name="Report Generator Controller",
+        name="Report Generator Controller",
         description="Report generation SiLA feature",
         **kwargs,
     ):
         super().__init__(
             *args,
             identifier=identifier,
-            display_name=display_name,
+            name=name,
             description=description,
             **kwargs,
         )
@@ -42,7 +42,6 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
         name="Generate Report",
         errors=[InternalError, InvalidParameterError, ReportGenerationError],
     )
-    @sila.Response("Report ID")
     async def generate_report(
         self,
         identifier: str,
@@ -51,9 +50,11 @@ class ReportGenController(sila.Feature, metaclass=abc.ABCMeta):
         """
         Generate a report from an identifier.
 
-        .. parameter:: Unique indentifier of a data set to generated the report from
-        .. parameter:: Additional information needed to generate the report
+        Args:
+            identifier: Unique identifier of a data set to generate the report from.
+            additional_info: Additional information needed to generate the report.
 
-        .. return:: Unique identifier of the generated report
+        Returns:
+            Unique identifier of the generated report.
         """
         # Note: Abstract method

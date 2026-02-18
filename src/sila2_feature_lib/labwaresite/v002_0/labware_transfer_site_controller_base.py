@@ -4,14 +4,13 @@ import typing
 
 from unitelabs.cdk import sila
 
-
 # Import errors from manipulator's defined_execution_errors
 from .defined_execution_errors import (
+    CommandSequenceInvalidError,
     HandoverPositionUnknownError,
     InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
     LabwareDeliveryFailed,
+    LabwareIDUnknownError,
     LabwareRetrievalFailed,
     PositionOccupiedError,
 )
@@ -89,7 +88,11 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         )
 
     #
+<<<<<<< HEAD
     # Properties
+=======
+    # Management
+>>>>>>> main
     #
 
     @abc.abstractmethod
@@ -155,10 +158,15 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         Asks, if the device is ready to deliver labware at the specified handover position.
         This command is used to check if the device is ready to deliver labware at the specified handover position.
 
+<<<<<<< HEAD
         Args:
             HandoverPositionID: A unique identifier of the handover position where the labware will be received.
             InternalPositionID: The unique identifier of the internal position where the labware will be stored.
             LabwareID: The unique identifier of the labware to ensure proper handling.
+=======
+        .. parameter:: HandoverPositionID
+            A unique identifier of the handover position where the labware will be received.
+>>>>>>> main
 
         Returns:
             True if the device is ready to deliver labware at the specified handover position, otherwise False.

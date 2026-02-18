@@ -4,18 +4,18 @@ import typing
 
 from unitelabs.cdk import sila
 
-
 from .defined_execution_errors import (
+    CommandSequenceInvalidError,
     HandoverPositionUnknownError,
     InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
-    LabwareRetrievalFailed,
     LabwareDeliveryFailed,
-    PositionOccupiedError
+    LabwareIDUnknownError,
+    LabwareRetrievalFailed,
+    PositionOccupiedError,
 )
 
 logger = logging.getLogger(__name__)
+
 
 class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     """
@@ -42,7 +42,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
 
     0. To inform the active transfer device, if the labware provider is ready to deliver labware at the specified handover
        position, the "Ready For Retrieval" command is sent to the passive device. If the passive device is not ready to
-       deliver labware, ... 
+       deliver labware, ...
 
     1. Prior to the actual labware transfer a "Prepare For Output" command is sent to the source device to execute all
        necessary actions to be ready to release a labware item (e.g. open a tray) and simultaneously a "Prepare For
@@ -88,7 +88,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     The property "Available Intermediate Actions" returns a list of commands that can be included in a "Put Labware" or
     "Get Labware" command.
     """
-    
+
     def __init__(self):
         super().__init__(
             originator="org.silastandard",
@@ -162,7 +162,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def ReadyForRetrieval(
@@ -192,7 +192,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def PrepareForRetrieval(
@@ -224,15 +224,16 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     @abc.abstractmethod
     @sila.ObservableCommand(
         name="Retrieve Labware",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareRetrievalFailed
-        ],
+        errors=[CommandSequenceInvalidError, LabwareRetrievalFailed],
     )
     async def RetrieveLabware(
         self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None, # UUID of the labware item to ensure proper handling
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
         intermediate: sila.Intermediate[int],
@@ -249,6 +250,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         Yields:
            SecondsRemaining: The estimated amount of seconds until the labware is retrieved.
         """
+
     # labware delivery - do similar to retrieval
 
     @abc.abstractmethod
@@ -259,7 +261,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def ReadyForDelivery(
@@ -280,7 +282,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         Returns:
             True if the device is ready to deliver labware, False otherwise.
         """
-    
+
     @abc.abstractmethod
     @sila.ObservableCommand(
         name="Prepare For Delivery",
@@ -289,7 +291,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def PrepareForDelivery(
@@ -325,13 +327,17 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         errors=[
             CommandSequenceInvalidError,
             LabwareDeliveryFailed,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def DeliverLabware(
         self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
         intermediate: sila.Intermediate[int],
