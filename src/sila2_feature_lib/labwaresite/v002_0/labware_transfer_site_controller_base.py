@@ -19,7 +19,6 @@ from .defined_execution_errors import (
 logger = logging.getLogger(__name__)
 
 
-
 class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     """
     This feature (together with the "Labware Transfer Manipulator Controller" feature) provides commands to trigger the
@@ -86,7 +85,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             category="manipulation",
             version="0.1",
             maturity_level="Draft",
-            identifier="LabwareTransferSiteController"
+            identifier="LabwareTransferSiteController",
         )
 
     #
@@ -132,9 +131,8 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             List of fully qualified command identifiers.
         """
 
-
     #
-    # Commands 
+    # Commands
     #
 
     @abc.abstractmethod
@@ -144,7 +142,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
         ],
     )
     async def ReadyForRetrieval(
@@ -174,7 +172,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def PrepareForInput(
@@ -185,7 +183,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,
         *,
         status: sila.Status,
-        intermediate: sila.Intermediate[int]
+        intermediate: sila.Intermediate[int],
     ) -> str:  # TransactionToken
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
@@ -204,36 +202,6 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    @sila.ObservableCommand(
-        name="LabwareDelivered",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareDeliveryFailed,
-            LabwareRetrievalFailed,
-            PositionOccupiedError
-        ]
-    )
-    async def LabwareDelivered(
-        self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
-        *,
-        status: sila.Status,
-        intermediate: sila.Intermediate[int]
-    ) -> None:
-        """
-        Notifies the passive destination device of a labware item that has been transferred to it.
-        Sent after a "Prepare For Input" command.
-
-        Yields:
-           SecondsRemaining: The estimated amount of seconds until the labware has been delivered.
-
-        Args:
-            IntermediateActions: Optional list of intermediate actions to execute.
-            LabwareID: UUID of the labware item to ensure proper handling.
-        """
-
-    @abc.abstractmethod
     @sila.UnobservableCommand(
         name="Ready For Delivery",
         errors=[
@@ -241,7 +209,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def ReadyForDelivery(
@@ -265,13 +233,47 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     @sila.ObservableCommand(
+        name="LabwareDelivered",
+        errors=[
+            CommandSequenceInvalidError,
+            LabwareDeliveryFailed,
+            LabwareRetrievalFailed,
+            PositionOccupiedError,
+        ],
+    )
+    async def LabwareDelivered(
+        self,
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
+        *,
+        status: sila.Status,
+        intermediate: sila.Intermediate[int],
+    ) -> None:
+        """
+        Notifies the passive destination device of a labware item that has been transferred to it.
+        Sent after a "Prepare For Input" command.
+
+        Yields:
+           SecondsRemaining: The estimated amount of seconds until the labware has been delivered.
+
+        Args:
+            IntermediateActions: Optional list of intermediate actions to execute.
+            LabwareID: UUID of the labware item to ensure proper handling.
+        """
+
+    @abc.abstractmethod
+    @sila.ObservableCommand(
         name="Prepare For Output",
         errors=[
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
             LabwareIDUnknownError,
-            PositionOccupiedError
+            PositionOccupiedError,
         ],
     )
     async def PrepareForOutput(
@@ -282,7 +284,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         LabwareID: str,
         *,
         status: sila.Status,
-        intermediate: sila.Intermediate[int]
+        intermediate: sila.Intermediate[int],
     ) -> str:
         """
         Prepares the device into a state in which it is ready to release labware at the specified handover position.
@@ -303,18 +305,19 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     @sila.ObservableCommand(
         name="LabwareRemoved",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareRetrievalFailed
-        ]
+        errors=[CommandSequenceInvalidError, LabwareRetrievalFailed],
     )
     async def LabwareRemoved(
         self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
-        intermediate: sila.Intermediate[int]
+        intermediate: sila.Intermediate[int],
     ) -> None:
         """
         Notifies the passive source device of a labware item that has been removed from it.
@@ -327,5 +330,3 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             SecondsRemaining: The estimated amount of seconds until the labware has been removed.
 
         """
-
-   
