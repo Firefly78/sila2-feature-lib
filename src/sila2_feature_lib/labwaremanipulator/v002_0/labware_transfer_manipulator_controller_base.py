@@ -112,12 +112,11 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             A list of all handover position IDs.
         """
 
-
     @abc.abstractmethod
     @sila.UnobservableProperty(display_name="Internal Positions")
     async def InternalPositions(
         self,
-    ) -> list[str]: # better naming 
+    ) -> list[str]:  # better naming
         """
         The number of addressable internal positions of the device.
 
@@ -167,10 +166,10 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
     )
     async def ReadyForRetrieval(
         self,
-        HandoverPositionID: str, # UUID of the handover position
-        InternalPositionID: str, # UUID of the internal position
-        LabwareID: str, # UUID of the labware item to ensure proper handling
-    ) -> bool: 
+        HandoverPositionID: str,  # UUID of the handover position
+        InternalPositionID: str,  # UUID of the internal position
+        LabwareID: str,  # UUID of the labware item to ensure proper handling
+    ) -> bool:
         """
         Asks, if the device is ready to deliver labware at the specified handover position.
         This command is used to check if the device is ready to deliver labware at the specified handover position.
@@ -203,7 +202,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         LabwareID: str,
         *,
         status: sila.Status,
-        intermediate: sila.Intermediate[int]
+        intermediate: sila.Intermediate[int],
     ) -> str:
         """
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
@@ -246,7 +245,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             IntermediateActions: Optional list of intermediate actions to execute during retrieval.
             LabwareID: UUID of the labware item to ensure proper handling.
             TransactionToken: Transaction token for tracking the retrieval.
-        
+
         Yields:
            SecondsRemaining: The estimated amount of seconds until the labware is retrieved.
         """
@@ -302,7 +301,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
         LabwareID: str,
         *,
         status: sila.Status,
-        intermediate: sila.Intermediate[int]
+        intermediate: sila.Intermediate[int],
     ) -> str:
         """
         Prepares the device into a state in which it is ready to release labware at the specified handover position.
@@ -354,8 +353,3 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
            SecondsRemaining: The estimated amount of seconds until the labware is delivered.
         """
         pass
-
-
-
-    
-     

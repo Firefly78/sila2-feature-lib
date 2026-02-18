@@ -6,11 +6,11 @@ from unitelabs.cdk import sila
 
 # Import errors from local defined_execution_errors
 from ..defined_execution_errors import (
+    CommandSequenceInvalidError,
     HandoverPositionUnknownError,
     InternalPositionUnknownError,
-    LabwareIDUnknownError,
-    CommandSequenceInvalidError,
     LabwareDeliveryFailed,
+    LabwareIDUnknownError,
     LabwareRetrievalFailed,
     NestOccupiedError,
 )
@@ -88,7 +88,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         )
 
     #
-    # Management 
+    # Management
     #
 
     @abc.abstractmethod
@@ -127,7 +127,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
         ],
     )
     @sila.Response(name="Ready For Retrieval")
@@ -144,7 +144,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         This command is used to check if the device is ready to deliver labware at the specified handover position.
 
         .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+            A unique identifier of the handover position where the labware will be received.
 
         .. parameter:: InternalPositionID
             The unique identifier of the internal position where the labware will be stored.
@@ -177,7 +177,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
         Prepares the device into a state in which it is ready to accept labware at the specified handover position.
 
         .. parameter:: HandoverPositionID
-            A unique identifier of the handover position where the labware will be received. 
+            A unique identifier of the handover position where the labware will be received.
 
         .. parameter:: InternalPositionID
             A unique identifier of the internal position where the labware will be stored.
@@ -192,20 +192,22 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     @sila.ObservableCommand(
         name="LabwareDelivered",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareDeliveryFailed
-        ]
+        errors=[CommandSequenceInvalidError, LabwareDeliveryFailed],
     )
     async def LabwareDelivered(
         self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive destination device of a labware item that has been transferred to it (sent after a "Prepare For Input" command).
+        Notifies the passive destination device of a labware item that has been transferred to it \
+              (sent after a "Prepare For Input" command).
         """
 
     @abc.abstractmethod
@@ -215,7 +217,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
         ],
     )
     @sila.Response(name="Ready For Delivery")
@@ -248,7 +250,7 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
             CommandSequenceInvalidError,
             HandoverPositionUnknownError,
             InternalPositionUnknownError,
-            LabwareIDUnknownError
+            LabwareIDUnknownError,
         ],
     )
     async def PrepareForOutput(
@@ -279,18 +281,20 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     @sila.ObservableCommand(
         name="LabwareRemoved",
-        errors=[
-            CommandSequenceInvalidError,
-            LabwareRetrievalFailed
-        ]
+        errors=[CommandSequenceInvalidError, LabwareRetrievalFailed],
     )
     async def LabwareRemoved(
         self,
-        IntermediateActions: list[str] = None,  # TODO: needs further specification/discussion
-        LabwareID: typing.Optional[str] = None,  # UUID of the labware item to ensure proper handling
+        IntermediateActions: list[
+            str
+        ] = None,  # TODO: needs further specification/discussion
+        LabwareID: typing.Optional[
+            str
+        ] = None,  # UUID of the labware item to ensure proper handling
         *,
         status: sila.Status,
     ) -> None:
         """
-        Notifies the passive source device of a labware item that has been removed from it (sent after a "Prepare For Output" command).
+        Notifies the passive source device of a labware item that has been removed from it \
+        (sent after a "Prepare For Output" command).
         """
