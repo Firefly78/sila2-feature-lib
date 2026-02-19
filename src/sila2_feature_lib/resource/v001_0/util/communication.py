@@ -117,6 +117,7 @@ class SilaCall(BaseCall):
             c._channel.close()
         logger.debug("Client cash cleared")
 
+    # flake8: noqa: C901
     async def Call(self, *args, **kwargs):
         if self.simulated:  # Simulation active!!
             logger.info("Simulating call to: %s", self.method)

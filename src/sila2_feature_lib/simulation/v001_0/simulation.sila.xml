@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Feature Locale="en-us" SiLA2Version="1.1" FeatureVersion="1.0" MaturityLevel="Draft" Originator="ch.unitelabs" Category="core"
+<Feature SiLA2Version="1.1" FeatureVersion="1.0" Originator="org.silastandard"
          xmlns="http://www.sila-standard.org"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
@@ -9,22 +9,27 @@
     This Feature provides control over the simulation behaviour of a SiLA Server.
 
         A SiLA Server can run in two modes:
-        (a) Real Mode - with real activities, e.g. addressing or controlling real hardware, e.g. through serial/CANBus commands,
+        (a) Real Mode - with real activities, e.g. addressing or controlling real
+    hardware, e.g. through serial/CANBus commands,
             writing to real databases, moving real objects etc.
-        (b) Simulation Mode - where every command is only simulated and responses are just example returns.
+        (b) Simulation Mode - where every command is only simulated and responses are just
+    example returns.
 
-        Note that certain commands and properties might not be affected by this feature if they
+        Note that certain commands and properties might not be affected by this feature if
+    they
         do not interact with the real world.
   </Description>
   <Command>
     <Identifier>StartRealMode</Identifier>
     <DisplayName>Start Real Mode</DisplayName>
     <Description>
-      Sets the SiLA Server to run in real mode, i.e. all following commands are executed with real-world
-            interactions, like serial port/CAN communication, motor actions etc.
+      Sets the SiLA Server to run in real mode, i.e. all following commands are executed
+      with real-world         interactions, like serial port/CAN communication, motor
+      actions etc.
 
-            If the server is in Simulation Mode it can be interrupted at any time. A re-initialization of
-            the hardware might be required. The Real Mode can be stopped by issuing the 'Start Simulation Mode' command.
+      If the server is in Simulation Mode it can be interrupted at any time. A re-
+      initialization of         the hardware might be required. The Real Mode can be stopped
+      by issuing the &apos;Start Simulation Mode&apos; command.
     </Description>
     <Observable>No</Observable>
     <DefinedExecutionErrors>
@@ -35,13 +40,13 @@
     <Identifier>StartSimulationMode</Identifier>
     <DisplayName>Start Simulation Mode</DisplayName>
     <Description>
-      Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are executed in simulation 
-              mode.
+      Sets the SiLA Server to run in Simulation Mode, i.e. all following commands are
+      executed in simulation         mode.
 
-              The Simulation Mode can only be entered, if all hardware operations have been safely terminated
-              or are in a controlled, safe state.
+      The Simulation Mode can only be entered, if all hardware operations have been safely
+      terminated         or are in a controlled, safe state.
 
-              The simulation mode can be stopped by issuing the 'Start Real Mode' command.
+      The simulation mode can be stopped by issuing the &apos;Start Real Mode&apos; command.
     </Description>
     <Observable>No</Observable>
     <DefinedExecutionErrors>
@@ -61,16 +66,17 @@
     <Identifier>StartRealModeFailed</Identifier>
     <DisplayName>Start Real Mode Failed</DisplayName>
     <Description>
-      The server cannot change to Real Mode.
-      This error can, e.g. be thrown, if a device is not ready to change into Real Mode.
+      The server cannot change to Real Mode.     This error can, e.g. be thrown, if a device
+      is not ready to change into Real Mode.
+
     </Description>
   </DefinedExecutionError>
   <DefinedExecutionError>
     <Identifier>StartSimulationModeFailed</Identifier>
     <DisplayName>Start Simulation Mode Failed</DisplayName>
     <Description>
-      The server cannot change to Simulation Mode.
-      This error can, e.g., be thrown, if a real-world process needs to be ended before switching to simulation     mode.
+      The server cannot change to Simulation Mode.     This error can, e.g., be thrown, if a
+      real-world process needs to be ended before switching to simulation     mode.
     </Description>
   </DefinedExecutionError>
 </Feature>
