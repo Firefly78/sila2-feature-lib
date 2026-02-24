@@ -80,9 +80,9 @@ class LabwareTransferSiteControllerBase(sila.Feature, metaclass=abc.ABCMeta):
 
     def __init__(self):
         super().__init__(
-            originator="io.csbda",
-            category="manipulation",
-            version="0.1",
+            originator="org.silastandard",
+            category="instruments.labware.manipulation",
+            version="1.1",
             maturity_level="Draft",
             identifier="LabwareTransferSiteController",
         )

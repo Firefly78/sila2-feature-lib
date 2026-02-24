@@ -94,7 +94,7 @@ class LabwareTransferManipulatorControllerBase(sila.Feature, metaclass=abc.ABCMe
             originator="org.silastandard",
             category="instruments.labware.manipulation",
             version="1.1",
-            maturity_level="draft",
+            maturity_level="Draft",
             identifier="LabwareTransferManipulatorController",
         )
 
