@@ -1,217 +1,408 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Feature Locale="en-us" SiLA2Version="1.1" FeatureVersion="1.0" MaturityLevel="Verified" Originator="org.silastandard" Category="instruments.labware.manipulation"
+<Feature SiLA2Version="1.1" FeatureVersion="1.1" MaturityLevel="Draft" Originator="org.silastandard" Category="instruments.labware.manipulation"
          xmlns="http://www.sila-standard.org"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
-  <Identifier>LabwareTransferManipulatorControllerBase</Identifier>
+  <Identifier>LabwareTransferManipulatorController</Identifier>
   <DisplayName>Labware Transfer Manipulator Controller Base</DisplayName>
   <Description>
-    This feature (together with the "Labware Transfer Site Controller" feature) provides commands to trigger the
-    sub-tasks of handing over a labware item, e.g. a microtiter plate or a tube, from one device to another in a
+    This feature (together with the &quot;Labware Transfer Site Controller&quot; feature)
+    provides commands to trigger the
+    sub-tasks of handing over a labware item, e.g. a microtiter plate or a tube, from one
+    device to another in a
     standardized and generic way.
 
-    For each labware transfer a defined sequence of commands has to be called on both involved devices to ensure the
-    proper synchronization of all necessary transfer actions without unwanted physical interferences and to optimize
-    the transfer performance regarding the execution time. Using the generic commands, labware transfers between any
-    arbitrary labware handling devices can be controlled (a robot device has not necessarily to be involved).
+    For each labware transfer a defined sequence of commands has to be called on both
+    involved devices to ensure the
+    proper synchronization of all necessary transfer actions without unwanted physical
+    interferences and to optimize
+    the transfer performance regarding the execution time. Using the generic commands,
+    labware transfers between any
+    arbitrary labware handling devices can be controlled (a robot device has not
+    necessarily to be involved).
 
-    Generally, a labware transfer is executed between a source and a destination device, where one of them is the
-    active device (executing the handover actions) and the other one is the passive device.
+    Generally, a labware transfer is executed between a source and a destination device,
+    where one of them is the
+    active device (executing the handover actions) and the other one is the passive
+    device.
 
-    The "Labware Transfer Manipulator Controller" feature is used to control the labware transfer on the side of the
-    active device to hand over labware to or take over labware from a passive device, which provides the
-    "Labware Transfer Site Controller" feature.
+    The &quot;Labware Transfer Manipulator Controller&quot; feature is used to control the
+    labware transfer on the side of the
+    active device to hand over labware to or take over labware from a passive device,
+    which provides the
+    &quot;Labware Transfer Site Controller&quot; feature.
 
-    If a device is capable to act either as the active or as the passive device of a labware transfer it must provide
+    If a device is capable to act either as the active or as the passive device of a
+    labware transfer it must provide
     both features.
 
     The complete sequence of issued transfer commands on both devices is as follows:
 
-    1. Prior to the actual labware transfer a "Prepare For Output" command is sent to the source device to execute all
-       necessary actions to be ready to release a labware item (e.g. open a tray) and simultaneously a "Prepare For
-       Input" command is sent to the destination device to execute all necessary actions to be ready to receive a
+    0. To inform the active transfer device, if the labware provider is ready to deliver
+    labware at the specified handover
+       position, the &quot;Ready For Retrieval&quot; command is sent to the passive
+    device. If the passive device is not ready to
+       deliver labware, ...
+
+    1. Prior to the actual labware transfer a &quot;Prepare For Output&quot; command is
+    sent to the source device to execute all
+       necessary actions to be ready to release a labware item (e.g. open a tray) and
+    simultaneously a &quot;Prepare For
+       Input&quot; command is sent to the destination device to execute all necessary
+    actions to be ready to receive a
        labware item (e.g. position the robotic arm near the tray of the source device).
-    2. When both devices have successfully finished their "Prepare For ..." command execution, the next commands are
+    2. When both devices have successfully finished their &quot;Prepare For ...&quot;
+    command execution, the next commands are
        issued.
-    3a If the source device is the active device it will receive a "Put Labware" command to execute all necessary
-       actions to put the labware item into the destination device. After the transfer has been finished successfully,
-       the destination device receives a "Labware Delivered" command, that triggers all actions to be done after the
+    3a If the source device is the active device it will receive a &quot;Put Labware&quot;
+    command to execute all necessary
+       actions to put the labware item into the destination device. After the transfer has
+    been finished successfully,
+       the destination device receives a &quot;Labware Delivered&quot; command, that
+    triggers all actions to be done after the
        labware item has been transferred (e.g. close the opened tray).
-    3b If the destination device is the active device it will receive a "Get Labware" command to execute all necessary
-       actions to get the labware from the source device (e.g. gripping the labware item). After that command has been
-       finished successfully, the source device receives a "Labware Removed" command, that triggers all actions to be
+    3b If the destination device is the active device it will receive a &quot;Get
+    Labware&quot; command to execute all necessary
+       actions to get the labware from the source device (e.g. gripping the labware item).
+    After that command has been
+       finished successfully, the source device receives a &quot;Labware Removed&quot;
+    command, that triggers all actions to be
        done after the labware item has been transferred (e.g. close the opened tray).
 
-    The command sequences for an active source or destination device have always to be as follows:
+    The command sequences for an active source or destination device have always to be as
+    follows:
     - for an active source device:        PrepareForOutput - PutLabware.
     - for an active destination device:   PrepareForInput - GetLabware.
 
-    If the commands issued by the client differ from the respective command sequences an "Invalid Command Sequence"
+    If the commands issued by the client differ from the respective command sequences an
+    &quot;Invalid Command Sequence&quot;
     error will be raised.
 
-    To address the location, where a labware item can be handed over to or from other devices, every device must
-    provide one or more uniquely named positions (handover positions) via the "Available Handover Positions" property.
-    A robot (active device) should have at least one handover position for each device that it interacts with, whereas
-    most passive devices will only have one handover position. In the case of a position array (e.g. a rack), the
-    position within the array is specified via the sub-position of the handover position, passed as an index number.
+    To address the location, where a labware item can be handed over to or from other
+    devices, every device must
+    provide one or more uniquely named positions (handover positions) via the
+    &quot;Available Handover Positions&quot; property.
+    A robot (active device) should have at least one handover position for each device
+    that it interacts with, whereas
+    most passive devices will only have one handover position. In the case of a position
+    array (e.g. a rack), the
+    position within the array is specified via the sub-position of the handover position,
+    passed as an index number.
 
-    To address the positions within a device where the transferred labware item has to be stored at or is to be taken
-    from (e.g. the storage positions inside an incubator), the internal position is specified. Each device must provide
-    the number of available internal positions via the "Number Of Internal Positions" property. In the case of no
-    multiple internal positions, this property as well as the "Internal Position" parameter value must be 1.
+    To address the positions within a device where the transferred labware item has to be
+    stored at or is to be taken
+    from (e.g. the storage positions inside an incubator), the internal position is
+    specified. Each device must provide
+    the number of available internal positions via the &quot;Number Of Internal
+    Positions&quot; property. In the case of no
+    multiple internal positions, this property as well as the &quot;Internal
+    Position&quot; parameter value must be 1.
 
-    With the "Prepare For Input" command there is also information about the labware transferred, like labware type or
+    With the &quot;Prepare For Input&quot; command there is also information about the
+    labware transferred, like labware type or
     a unique labware identifier (e.g. a barcode).
 
-    The "Intermediate Actions" parameter of the "Put Labware" and "Get Labware" commands can be used to specify commands
-    that have to be executed while a labware item is transferred to avoid unnecessary movements, e.g. if a robot has to
-    get a plate from a just opened tray and a lid has to be put on the plate before it will be gripped, the lid handling
-    actions have to be included in the "Get Labware" actions. The intermediate actions have to be executed in the same
-    order they have been specified by the "Intermediate Actions" parameter.
-    The property "Available Intermediate Actions" returns a list of commands that can be included in a "Put Labware" or
-    "Get Labware" command.
+    The &quot;Intermediate Actions&quot; parameter of the &quot;Put Labware&quot; and
+    &quot;Get Labware&quot; commands can be used to specify commands
+    that have to be executed while a labware item is transferred to avoid unnecessary
+    movements, e.g. if a robot has to
+    get a plate from a just opened tray and a lid has to be put on the plate before it
+    will be gripped, the lid handling
+    actions have to be included in the &quot;Get Labware&quot; actions. The intermediate
+    actions have to be executed in the same
+    order they have been specified by the &quot;Intermediate Actions&quot; parameter.
+    The property &quot;Available Intermediate Actions&quot; returns a list of commands
+    that can be included in a &quot;Put Labware&quot; or
+    &quot;Get Labware&quot; command.
   </Description>
   <Command>
-    <Identifier>GetLabware</Identifier>
-    <DisplayName>Get Labware</DisplayName>
+    <Identifier>DeliverLabware</Identifier>
+    <DisplayName>Deliver Labware</DisplayName>
     <Description>
-      Retrieve a labware item from the specified handover position (sent to the active destination device after a "Prepare For Input" command).
+      Delivers labware to the specified handover position.Yields:
+         SecondsRemaining: The estimated amount of seconds until the labware is delivered.
     </Description>
     <Observable>Yes</Observable>
     <Parameter>
-      <Identifier>Handoverposition</Identifier>
-      <DisplayName>Handoverposition</DisplayName>
-      <Description>Indicates the position where the labware will be retrieved from.</Description>
-      <DataType>
-        <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <Parameter>
-      <Identifier>Intermediateactions</Identifier>
-      <DisplayName>Intermediateactions</DisplayName>
-      <Description>
-        Specifies one or more commands that have to be executed within the command sequence (e.g. removing a lid). The order of execution is specified by order within the given list. Each entry must be one of the commands returned by the AvailableIntermediateCommandExecutions property.
-      </Description>
+      <Identifier>IntermediateActions</Identifier>
+      <DisplayName>Intermediate Actions</DisplayName>
+      <Description>Optional list of intermediate actions to execute during delivery.</Description>
       <DataType>
         <List>
           <DataType>
             <Basic>String</Basic>
           </DataType>
         </List>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>UUID of the labware item to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>TransactionToken</Identifier>
+      <DisplayName>Transaction Token</DisplayName>
+      <Description>Transaction token for tracking the delivery.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <IntermediateResponse>
+      <Identifier>IntermediateResponse0</Identifier>
+      <DisplayName>Intermediate Response 0</DisplayName>
+      <Description></Description>
+      <DataType>
+        <Basic>Integer</Basic>
+      </DataType>
+    </IntermediateResponse>
+    <DefinedExecutionErrors>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>LabwareDeliveryFailed</Identifier>
+      <Identifier>PositionOccupiedError</Identifier>
+    </DefinedExecutionErrors>
+  </Command>
+  <Command>
+    <Identifier>PrepareForDelivery</Identifier>
+    <DisplayName>Prepare For Delivery</DisplayName>
+    <Description>
+      Prepares the device into a state in which it is ready to release labware at the
+      specified handover position.
+    </Description>
+    <Observable>Yes</Observable>
+    <Parameter>
+      <Identifier>HandoverPositionID</Identifier>
+      <DisplayName>Handover Position ID</DisplayName>
+      <Description>A unique identifier of the handover position where the labware will be handed over.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>InternalPositionID</Identifier>
+      <DisplayName>Internal Position ID</DisplayName>
+      <Description>A unique identifier of the internal position where the labware will be stored.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareTypeID</Identifier>
+      <DisplayName>Labware Type ID</DisplayName>
+      <Description>The unique identifier of the labware type to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>The unique identifier of the labware to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
       </DataType>
     </Parameter>
     <Response>
-      <Identifier>HandoverPosition</Identifier>
-      <DisplayName>HandoverPosition</DisplayName>
-      <Description>The position where the labware was retrieved from.</Description>
+      <Identifier>TransactionToken</Identifier>
+      <DisplayName>Transaction Token</DisplayName>
+      <Description>A token that can be used to track the transaction of the labware delivery.</Description>
       <DataType>
-        <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
+        <Basic>String</Basic>
+      </DataType>
+    </Response>
+    <IntermediateResponse>
+      <Identifier>SecondsRemaining</Identifier>
+      <DisplayName>Seconds Remaining</DisplayName>
+      <Description>The estimated amount of seconds until the labware can be delivered.</Description>
+      <DataType>
+        <Basic>Integer</Basic>
+      </DataType>
+    </IntermediateResponse>
+    <DefinedExecutionErrors>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>HandoverPositionUnknownError</Identifier>
+      <Identifier>InternalPositionUnknownError</Identifier>
+      <Identifier>LabwareIDUnknownError</Identifier>
+      <Identifier>PositionOccupiedError</Identifier>
+    </DefinedExecutionErrors>
+  </Command>
+  <Command>
+    <Identifier>PrepareForRetrieval</Identifier>
+    <DisplayName>Prepare For Retrieval</DisplayName>
+    <Description>
+      Prepares the device into a state in which it is ready to accept labware at the
+      specified handover position.
+    </Description>
+    <Observable>Yes</Observable>
+    <Parameter>
+      <Identifier>HandoverPositionID</Identifier>
+      <DisplayName>Handover Position ID</DisplayName>
+      <Description>A unique identifier of the handover position where the labware will be received.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>InternalPositionID</Identifier>
+      <DisplayName>Internal Position ID</DisplayName>
+      <Description>A unique identifier of the internal position where the labware will be stored.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareTypeID</Identifier>
+      <DisplayName>Labware Type ID</DisplayName>
+      <Description>The unique identifier of the labware type to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>The unique identifier of the labware to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Response>
+      <Identifier>TransactionToken</Identifier>
+      <DisplayName>Transaction Token</DisplayName>
+      <Description>A token that can be used to track the transaction of the labware retrieval.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Response>
+    <IntermediateResponse>
+      <Identifier>SecondsRemaining</Identifier>
+      <DisplayName>Seconds Remaining</DisplayName>
+      <Description>The estimated amount of seconds until the labware is ready for retrieval.</Description>
+      <DataType>
+        <Basic>Integer</Basic>
+      </DataType>
+    </IntermediateResponse>
+    <DefinedExecutionErrors>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>HandoverPositionUnknownError</Identifier>
+      <Identifier>InternalPositionUnknownError</Identifier>
+      <Identifier>LabwareIDUnknownError</Identifier>
+      <Identifier>PositionOccupiedError</Identifier>
+    </DefinedExecutionErrors>
+  </Command>
+  <Command>
+    <Identifier>ReadyForDelivery</Identifier>
+    <DisplayName>Ready For Delivery</DisplayName>
+    <Description>
+      Asks, if the device is ready to release labware at the specified handover position.
+      This command is used to check if the device is ready to release labware at the
+      specified handover position.
+    </Description>
+    <Observable>No</Observable>
+    <Parameter>
+      <Identifier>HandoverPositionID</Identifier>
+      <DisplayName>Handover Position ID</DisplayName>
+      <Description>A unique identifier of the handover position where the labware will be handed over.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>InternalPositionID</Identifier>
+      <DisplayName>Internal Position ID</DisplayName>
+      <Description>The unique identifier of the internal position where the labware will be stored.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>The unique identifier of the labware to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Response>
+      <Identifier>Response0</Identifier>
+      <DisplayName>Response 0</DisplayName>
+      <Description>True if the device is ready to deliver labware, False otherwise.</Description>
+      <DataType>
+        <Basic>Boolean</Basic>
       </DataType>
     </Response>
     <DefinedExecutionErrors>
-      <Identifier>InvalidCommandSequence</Identifier>
-      <Identifier>LabwareNotPicked</Identifier>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>HandoverPositionUnknownError</Identifier>
+      <Identifier>InternalPositionUnknownError</Identifier>
+      <Identifier>LabwareIDUnknownError</Identifier>
+      <Identifier>PositionOccupiedError</Identifier>
     </DefinedExecutionErrors>
   </Command>
   <Command>
-    <Identifier>PrepareForInput</Identifier>
-    <DisplayName>Prepare For Input</DisplayName>
+    <Identifier>ReadyForRetrieval</Identifier>
+    <DisplayName>Ready For Retrieval</DisplayName>
     <Description>
-      Put the device into a state in which it is ready to accept new labware at the specified handover position.
+      Asks, if the device is ready to deliver labware at the specified handover position.
+      This command is used to check if the device is ready to deliver labware at the
+      specified handover position.
     </Description>
-    <Observable>Yes</Observable>
+    <Observable>No</Observable>
     <Parameter>
-      <Identifier>Handoverposition</Identifier>
-      <DisplayName>Handoverposition</DisplayName>
-      <Description>Indicates the position where the labware will be handed over.</Description>
-      <DataType>
-        <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <Parameter>
-      <Identifier>Internalposition</Identifier>
-      <DisplayName>Internalposition</DisplayName>
-      <Description>
-        Indicates the position which the labware will be stored at within the device, e.g. internal storage positions of an incubator.
-      </Description>
-      <DataType>
-        <DataTypeIdentifier>PositionIndex</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <Parameter>
-      <Identifier>Labwaretype</Identifier>
-      <DisplayName>Labwaretype</DisplayName>
-      <Description>
-        Specifies the type of labware that will be handed over to transfer information about the labware that the device might need to handle it correctly.
-      </Description>
+      <Identifier>HandoverPositionID</Identifier>
+      <DisplayName>Handover Position ID</DisplayName>
+      <Description>A unique identifier of the handover position where the labware will be received.</Description>
       <DataType>
         <Basic>String</Basic>
       </DataType>
     </Parameter>
     <Parameter>
-      <Identifier>LabwareUniqueID</Identifier>
-      <DisplayName>Labware Unique ID</DisplayName>
-      <Description>
-        Represents the unique identification of a labware in the controlling system. It is assigned by the system and must remain unchanged during the whole process.
-      </Description>
+      <Identifier>InternalPositionID</Identifier>
+      <DisplayName>Internal Position ID</DisplayName>
+      <Description>The unique identifier of the internal position where the labware will be stored.</Description>
       <DataType>
         <Basic>String</Basic>
       </DataType>
     </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>The unique identifier of the labware to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Response>
+      <Identifier>Response0</Identifier>
+      <DisplayName>Response 0</DisplayName>
+      <Description>
+        True if the device is ready to deliver labware at the specified handover position,
+        otherwise False.
+      </Description>
+      <DataType>
+        <Basic>Boolean</Basic>
+      </DataType>
+    </Response>
     <DefinedExecutionErrors>
-      <Identifier>InvalidCommandSequence</Identifier>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>HandoverPositionUnknownError</Identifier>
+      <Identifier>InternalPositionUnknownError</Identifier>
+      <Identifier>LabwareIDUnknownError</Identifier>
+      <Identifier>PositionOccupiedError</Identifier>
     </DefinedExecutionErrors>
   </Command>
   <Command>
-    <Identifier>PrepareForOutput</Identifier>
-    <DisplayName>Prepare For Output</DisplayName>
-    <Description>
-      Put the device into a state in which it is ready to release the labware at the specified handover position.
-    </Description>
+    <Identifier>RetrieveLabware</Identifier>
+    <DisplayName>Retrieve Labware</DisplayName>
+    <Description>Retrieves labware from the specified handover position.</Description>
     <Observable>Yes</Observable>
     <Parameter>
-      <Identifier>Handoverposition</Identifier>
-      <DisplayName>Handoverposition</DisplayName>
-      <Description>Indicates the position where the labware will be handed over.</Description>
-      <DataType>
-        <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <Parameter>
-      <Identifier>Internalposition</Identifier>
-      <DisplayName>Internalposition</DisplayName>
-      <Description>
-        Indicates the position which the labware will be retrieved from within the device, e.g. internal storage positions of an incubator.
-      </Description>
-      <DataType>
-        <DataTypeIdentifier>PositionIndex</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <DefinedExecutionErrors>
-      <Identifier>InvalidCommandSequence</Identifier>
-    </DefinedExecutionErrors>
-  </Command>
-  <Command>
-    <Identifier>PutLabware</Identifier>
-    <DisplayName>Put Labware</DisplayName>
-    <Description>
-      Place the currently processed labware item at the specified handover position (sent to the active source device after a "Prepare For Output" command).
-    </Description>
-    <Observable>Yes</Observable>
-    <Parameter>
-      <Identifier>Handoverposition</Identifier>
-      <DisplayName>Handoverposition</DisplayName>
-      <Description>Indicates the position the labware item will be moved to.</Description>
-      <DataType>
-        <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
-      </DataType>
-    </Parameter>
-    <Parameter>
-      <Identifier>Intermediateactions</Identifier>
-      <DisplayName>Intermediateactions</DisplayName>
-      <Description>
-        Specifies one or more commands that have to be executed within the command sequence (e.g. removing a lid). The order of execution is specified by order within the given list. Each entry must be one of the commands returned by the AvailableIntermediateCommandExecutions property.
-      </Description>
+      <Identifier>IntermediateActions</Identifier>
+      <DisplayName>Intermediate Actions</DisplayName>
+      <Description>Optional list of intermediate actions to execute during retrieval.</Description>
       <DataType>
         <List>
           <DataType>
@@ -220,29 +411,41 @@
         </List>
       </DataType>
     </Parameter>
+    <Parameter>
+      <Identifier>LabwareID</Identifier>
+      <DisplayName>Labware ID</DisplayName>
+      <Description>UUID of the labware item to ensure proper handling.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>TransactionToken</Identifier>
+      <DisplayName>Transaction Token</DisplayName>
+      <Description>Transaction token for tracking the retrieval.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <IntermediateResponse>
+      <Identifier>SecondsRemaining</Identifier>
+      <DisplayName>Seconds Remaining</DisplayName>
+      <Description>The estimated amount of seconds until the labware is retrieved.</Description>
+      <DataType>
+        <Basic>Integer</Basic>
+      </DataType>
+    </IntermediateResponse>
     <DefinedExecutionErrors>
-      <Identifier>InvalidCommandSequence</Identifier>
-      <Identifier>LabwareNotPlaced</Identifier>
+      <Identifier>CommandSequenceInvalidError</Identifier>
+      <Identifier>LabwareRetrievalFailed</Identifier>
     </DefinedExecutionErrors>
   </Command>
-  <Property>
-    <Identifier>AvailableHandoverPositions</Identifier>
-    <DisplayName>Available Handover Positions</DisplayName>
-    <Description>All handover positions of the device including the number of sub-positions.</Description>
-    <Observable>No</Observable>
-    <DataType>
-      <List>
-        <DataType>
-          <DataTypeIdentifier>HandoverPosition</DataTypeIdentifier>
-        </DataType>
-      </List>
-    </DataType>
-  </Property>
   <Property>
     <Identifier>AvailableIntermediateActions</Identifier>
     <DisplayName>Available Intermediate Actions</DisplayName>
     <Description>
-      Returns all commands that can be executed within a "Put Labware" or "Get Labware" command execution.
+      Returns all commands that can be executed within a &quot;Put Labware&quot; or
+      &quot;Get Labware&quot; command execution.
     </Description>
     <Observable>No</Observable>
     <DataType>
@@ -261,89 +464,67 @@
     </DataType>
   </Property>
   <Property>
-    <Identifier>NumberOfInternalPositions</Identifier>
-    <DisplayName>Number Of Internal Positions</DisplayName>
+    <Identifier>InternalPositions</Identifier>
+    <DisplayName>Internal Positions</DisplayName>
     <Description>The number of addressable internal positions of the device.</Description>
     <Observable>No</Observable>
     <DataType>
-      <Constrained>
+      <List>
         <DataType>
-          <Basic>Integer</Basic>
+          <Basic>String</Basic>
         </DataType>
-        <Constraints>
-          <MinimalInclusive>1</MinimalInclusive>
-        </Constraints>
-      </Constrained>
+      </List>
+    </DataType>
+  </Property>
+  <Property>
+    <Identifier>AllAvailableHandoverPositions</Identifier>
+    <DisplayName>All Available Handover Positions</DisplayName>
+    <Description>All handover positions of the device including the number of sub-positions.</Description>
+    <Observable>No</Observable>
+    <DataType>
+      <List>
+        <DataType>
+          <Basic>String</Basic>
+        </DataType>
+      </List>
     </DataType>
   </Property>
   <DefinedExecutionError>
-    <Identifier>InvalidCommandSequence</Identifier>
-    <DisplayName>Invalid Command Sequence</DisplayName>
+    <Identifier>CommandSequenceInvalidError</Identifier>
+    <DisplayName>Command Sequence Invalid Error</DisplayName>
     <Description>
-      The issued command does not follow the sequence of commands for the device according to its role in the labware
-      transfer.
+      Raised when the command sequence is invalid, such as when a command is called out of
+      order.
     </Description>
   </DefinedExecutionError>
   <DefinedExecutionError>
-    <Identifier>LabwareNotPicked</Identifier>
-    <DisplayName>Labware Not Picked</DisplayName>
-    <Description>Picking up the labware item from the source device failed.</Description>
+    <Identifier>LabwareDeliveryFailed</Identifier>
+    <DisplayName>Labware Delivery Failed</DisplayName>
+    <Description>Raised when delivering a labware item to the destination device fails.</Description>
   </DefinedExecutionError>
   <DefinedExecutionError>
-    <Identifier>LabwareNotPlaced</Identifier>
-    <DisplayName>Labware Not Placed</DisplayName>
-    <Description>Placing the labware item at the destination device failed.</Description>
+    <Identifier>PositionOccupiedError</Identifier>
+    <DisplayName>Position Occupied Error</DisplayName>
+    <Description>Raised when attempting to place labware in an already occupied position.</Description>
   </DefinedExecutionError>
-  <DataTypeDefinition>
-    <Identifier>PositionIndex</Identifier>
-    <DisplayName>Position Index</DisplayName>
-    <Description>Specifies a position via an index number, starting at 1.</Description>
-    <DataType>
-      <Structure>
-        <Element>
-          <Identifier>Positionindex</Identifier>
-          <DisplayName>Positionindex</DisplayName>
-          <Description>Position index number.</Description>
-          <DataType>
-            <Constrained>
-              <DataType>
-                <Basic>Integer</Basic>
-              </DataType>
-              <Constraints>
-                <MinimalInclusive>1</MinimalInclusive>
-              </Constraints>
-            </Constrained>
-          </DataType>
-        </Element>
-      </Structure>
-    </DataType>
-  </DataTypeDefinition>
-  <DataTypeDefinition>
-    <Identifier>HandoverPosition</Identifier>
-    <DisplayName>Handover Position</DisplayName>
-    <Description>
-      Specifies one of the possible positions of a device where labware items can be handed over. Can contain a sub-position, e.g. for specifying a position in a rack.
-    </Description>
-    <DataType>
-      <Structure>
-        <Element>
-          <Identifier>Position</Identifier>
-          <DisplayName>Position</DisplayName>
-          <Description>The name of the handover position (must be unique within the device).</Description>
-          <DataType>
-            <Basic>String</Basic>
-          </DataType>
-        </Element>
-        <Element>
-          <Identifier>Positionindex</Identifier>
-          <DisplayName>Positionindex</DisplayName>
-          <Description>
-            The index of a sub-position within a handover position or the number of sub-positions respectively, e.g. for a rack.
-          </Description>
-          <DataType>
-            <DataTypeIdentifier>PositionIndex</DataTypeIdentifier>
-          </DataType>
-        </Element>
-      </Structure>
-    </DataType>
-  </DataTypeDefinition></Feature>
+  <DefinedExecutionError>
+    <Identifier>HandoverPositionUnknownError</Identifier>
+    <DisplayName>Handover Position Unknown Error</DisplayName>
+    <Description>Raised when the UUID of a handover position is unknown.</Description>
+  </DefinedExecutionError>
+  <DefinedExecutionError>
+    <Identifier>InternalPositionUnknownError</Identifier>
+    <DisplayName>Internal Position Unknown Error</DisplayName>
+    <Description>Raised when the UUID of an internal position is unknown.</Description>
+  </DefinedExecutionError>
+  <DefinedExecutionError>
+    <Identifier>LabwareIDUnknownError</Identifier>
+    <DisplayName>Labware ID Unknown Error</DisplayName>
+    <Description>Raised when the UUID of a labware item is unknown.</Description>
+  </DefinedExecutionError>
+  <DefinedExecutionError>
+    <Identifier>LabwareRetrievalFailed</Identifier>
+    <DisplayName>Labware Retrieval Failed</DisplayName>
+    <Description>Raised when retrieving a labware item from the source device fails.</Description>
+  </DefinedExecutionError>
+</Feature>
