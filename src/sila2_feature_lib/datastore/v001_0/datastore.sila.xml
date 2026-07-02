@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Feature Locale="en-us" SiLA2Version="1.1" FeatureVersion="0.1" MaturityLevel="Draft" Originator="ch.unitelabs" Category="core"
+<Feature SiLA2Version="1.1" FeatureVersion="0.1" Originator="org.silastandard"
          xmlns="http://www.sila-standard.org"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
@@ -9,12 +9,12 @@
   <Command>
     <Identifier>TestConnection</Identifier>
     <DisplayName>Test Connection</DisplayName>
-    <Description></Description>
+    <Description>Test Connection.</Description>
     <Observable>No</Observable>
     <Response>
-      <Identifier>Status</Identifier>
-      <DisplayName>Status</DisplayName>
-      <Description>Status of the connection</Description>
+      <Identifier>Response0</Identifier>
+      <DisplayName>Response 0</DisplayName>
+      <Description>&quot;OK&quot; if the connection is successful.</Description>
       <DataType>
         <Basic>String</Basic>
       </DataType>

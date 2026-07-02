@@ -3,7 +3,7 @@ import dataclasses
 from unitelabs.cdk import sila
 
 
-class InvalidCommandExecutionUUID(sila.DefinedExecutionError):
+class InvalidCommandExecutionUUID(Exception):
     """
     The specified command execution UUID is not valid for error recovery. There is currently no
     unhandled recoverable error related to the specified command execution. A possibly occurred
@@ -11,7 +11,7 @@ class InvalidCommandExecutionUUID(sila.DefinedExecutionError):
     """
 
 
-class UnknownContinuationOption(sila.DefinedExecutionError):
+class UnknownContinuationOption(Exception):
     """
     The specified continuation option is not defined for the error of the given observable command
     execution.

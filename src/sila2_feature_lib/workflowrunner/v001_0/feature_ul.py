@@ -9,7 +9,7 @@ from unitelabs.cdk import sila
 logger = logging.getLogger(__name__)
 
 
-class TaskError(sila.DefinedExecutionError):
+class TaskError(Exception):
     """Error during workflow"""
 
 
@@ -49,14 +49,14 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             self,
             *args,
             identifier: str = "WorkflowRunnerService",
-            display_name: str = "Workflow Runner Service",
+            name: str = "Workflow Runner Service",
             description: str = "Feature for starting/monitoring long running tasks",
             **kwargs,
         ):
             super().__init__(
                 *args,
                 identifier=identifier,
-                display_name=display_name,
+                name=name,
                 description=description,
                 **kwargs,
             )
@@ -68,9 +68,10 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
         )
         async def cancel_task(self, identifier: str) -> None:
             """
-            Cancel the task with the given identifier
+            Cancel the task with the given identifier.
 
-            .. parameter:: Task identifier
+            Args:
+                identifier: Task identifier.
             """
             pass
 
@@ -79,7 +80,7 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name="Running Tasks",
         )
         async def get_running_tasks(self) -> list[TaskStatus]:
-            """ "Get the status of all running tasks"""
+            """Get the status of all running tasks."""
             pass
 
         @abc.abstractmethod
@@ -87,12 +88,15 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name="Task Status",
             errors=[TaskError],
         )
-        @sila.Response("Status", "Status of a task")
         async def get_task_status(self, identifier: str) -> str:
             """
-            Get the status of the running task
+            Get the status of the running task.
 
-            .. identifier:: Task identifier
+            Args:
+                identifier: Task identifier.
+
+            Returns:
+                Status of the task.
             """
             pass
 
@@ -101,17 +105,20 @@ def get_workflow_feature(allowed_workflow_names: Optional[Iterable[str]] = None)
             name="Start New Task",
             errors=[TaskError],
         )
-        @sila.Response("Identifier", "Identifier of the started workflow process")
         async def start_new_task(
             self,
             name: typing.Annotated[str, wf_name_annotation],
             arguments_json: str,
         ) -> str:
             """
-            "Start a task from a named workflow and return immediately"
+            Start a task from a named workflow and return immediately.
 
-            .. name:: Name of the workflow
-            .. arguments_json:: JSON encoded arguments for the workflow
+            Args:
+                name: Name of the workflow.
+                arguments_json: JSON encoded arguments for the workflow.
+
+            Returns:
+                Identifier of the started workflow process.
             """
             pass
 
