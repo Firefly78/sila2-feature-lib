@@ -45,6 +45,11 @@ class TestImport(unittest.TestCase):
 
         _ = ResourcesService
 
+    def test_settings(self):
+        from sila2_feature_lib.settings.v001_0.feature_ul import SettingsService
+
+        _ = SettingsService
+
     def test_simulation(self):
         from sila2_feature_lib.simulation.v001_0.feature_ul import SimulatorController
 
